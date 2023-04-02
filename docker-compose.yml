@@ -1,0 +1,61 @@
+version: "3"
+
+networks:
+  forms-network:
+    driver: bridge
+
+services:
+  # Generate the postgres databse
+  database:
+    image: postgres:14.2-alpine
+    container_name: forms-database
+    # command: --init-file ./server/docker/script/sql.sql
+    environment:
+      POSTGRES_DB: university_form
+      POSTGRES_USER: username # The PostgreSQL user (useful to connect to the database)
+      POSTGRES_PASSWORD: password # The PostgreSQL password (useful to connect to the database)
+    ports:
+      - 5433:5432
+    networks:
+      forms-network:
+        aliases:
+          - forms-database
+    healthcheck:
+      test: ["CMD-SHELL", "sh -c 'pg_isready -U username -d university_form'"]
+      interval: 10s
+      timeout: 3s
+      retries: 3
+    volumes:
+      - ./backend/docker/db:/var/lib/postgresql/data
+
+  # Generate backend server
+  backend:
+    build: ./backend
+    restart: always
+    container_name: forms-backend
+    environment:
+      DB_CONNECTION: pgsql
+      DB_HOST: forms-database
+      DB_PORT: 5432
+      DB_DATABASE: university_form
+      DB_USERNAME: username # The PostgreSQL user (useful to connect to the database)
+      DB_PASSWORD: password # The PostgreSQL password (useful to connect to the database)
+    ports:
+      - 8000:8000
+    depends_on:
+      database:
+        condition: service_healthy
+    networks:
+      - forms-network
+
+  # Generate frontend server
+  frontend:
+    build: ./web
+    restart: always
+    container_name: forms-frontend
+    ports:
+      - 80:80
+    networks:
+      - forms-network
+    depends_on:       
+      - backend

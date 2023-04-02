@@ -1,0 +1,14 @@
+Criar migration com base nas alterações dos models.
+yarn typeorm migration:generate -n [MigrationName]
+
+Executar as migrations
+yarn typeorm migration:run 
+
+ESLINT
+yarn add eslint -D
+yarn add eslint-config-airbnb-typescript -D
+yarn add eslint-config-airbnb -D
+yarn add @typescript-eslint/eslint-plugin@^5.13.0 -D
+yarn add @typescript-eslint/parser@^5.0.0 -D
+npm install eslint-plugin-jsx-a11y@latest --save-dev --force
+npx eslint . --ext .js,.jsx,.ts,.tsx
