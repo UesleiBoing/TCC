@@ -1,6 +1,7 @@
-import multer from 'multer';
 import crypto from 'crypto';
 import path from 'path';
+
+import multer from 'multer';
 
 export default {
   upload(folder: string): multer.Options {

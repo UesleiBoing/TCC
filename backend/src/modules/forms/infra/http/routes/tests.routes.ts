@@ -1,17 +1,17 @@
 import { Router } from 'express';
 
-import ensureAuthenticationStudents from '@shared/infra/http/middlewares/ensureAuthenticationStudents';
+import ensureAuthenticationStudentsTeachers from '@shared/infra/http/middlewares/ensureAuthenticationStudentsTeachers';
 
 import TestsController from '../controllers/TestsController';
 
 const testsRouter = Router();
 const testsController = new TestsController();
 
-testsRouter.get('/', ensureAuthenticationStudents, testsController.find);
+testsRouter.get('/', ensureAuthenticationStudentsTeachers, testsController.find);
 testsRouter.post('/', testsController.create);
-testsRouter.get('/:id', ensureAuthenticationStudents, testsController.findOne);
-testsRouter.put('/:id', ensureAuthenticationStudents, testsController.update);
-testsRouter.patch('/:id', ensureAuthenticationStudents, testsController.update);
-testsRouter.delete('/:id', ensureAuthenticationStudents, testsController.delete);
+testsRouter.get('/:id', ensureAuthenticationStudentsTeachers, testsController.findOne);
+testsRouter.put('/:id', ensureAuthenticationStudentsTeachers, testsController.update);
+testsRouter.patch('/:id', ensureAuthenticationStudentsTeachers, testsController.update);
+testsRouter.delete('/:id', ensureAuthenticationStudentsTeachers, testsController.delete);
 
 export default testsRouter;

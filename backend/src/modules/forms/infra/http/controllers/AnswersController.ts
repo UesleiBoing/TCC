@@ -18,7 +18,7 @@ export default class AnswersController extends Controller {
 
   public async find(req: Request, res: Response): Promise<Response> {
     const service = container.resolve(AnswersService);
-    const result = await service.findPagination(req);
+    const result = await service.findAll();
 
     return res.status(200).json(result);
   }

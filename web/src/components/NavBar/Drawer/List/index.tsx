@@ -12,6 +12,7 @@ import { Link } from './styles';
 
 interface IProps {
   open: boolean;
+  handleDrawerClose: () => void;
 }
 
 interface IItem {
@@ -20,13 +21,11 @@ interface IItem {
   icon: JSX.Element;
 }
 
-const List: React.FC<IProps> = ({ open }) => {
+const List: React.FC<IProps> = ({ open, handleDrawerClose }) => {
   const { signOut } = useAuth();
-  const { saveSettingsBackend } = useSettings();
 
   async function handleClick(item: IItem) {
     if (item.title === 'Logout') {
-      await saveSettingsBackend();
       signOut();
     }
   }
@@ -38,7 +37,7 @@ const List: React.FC<IProps> = ({ open }) => {
           <Divider />
           <ListMUI>
             {group.map((item: IItem, index) => (
-              <ListItem key={index} disablePadding sx={{ display: 'block' }}>
+              <ListItem key={index} disablePadding sx={{ display: 'block' }} onClick={handleDrawerClose}>
                 <Link to={item.path} onClick={() => handleClick(item)}>
                   <ListItemButton sx={{
                       minHeight: 48,

@@ -1,13 +1,9 @@
-import { hash } from 'bcryptjs';
-import { container, inject, injectable } from 'tsyringe';
-import { Not } from 'typeorm';
+import { injectable } from 'tsyringe';
 
 import Service from '@shared/core/Service';
-import AppError from '@shared/errors/AppError';
+import client from '@shared/infra/prisma/client';
 
 import TopicRequest from '../infra/http/requests/TopicRequest';
-import Topic from '../infra/typeorm/entities/Topic';
-import ITopicsRepository from '../repositories/ITopicsRepository';
 
 interface IRequest {
   description: string;
@@ -18,16 +14,59 @@ interface IRequest {
 @injectable()
 export default class TopicsService extends Service {
 
-  constructor(
-    @inject('TopicsRepository')
-    protected repository: ITopicsRepository,
-  ) {
-    super();
+  client = client.topic;
+
+  public async findById(id: number) {
+    const topic = await this.client.findFirst({ where: { id } });
+
+    return topic;
   }
 
-  public entity = Topic;
+  public async findAll(data: object = {}) {
+    const topics = await this.client.findMany({
+      orderBy: [
+        { class_id: 'asc' },
+        { order: 'asc' },
+      ],
+      include: {
+        classes: true,
+      },
+    });
 
-  public async create(data: IRequest): Promise<Topic> {
+    return topics;
+  }
+
+  public async findByStudent(student_id: number) {
+    const topics = await this.client.findMany({
+      include: {
+        classes: true,
+      },
+      where: {
+        classes: {
+          classes_students: {
+            every: {
+              student_id,
+            },
+          },
+        },
+      },
+    });
+
+    return topics;
+  }
+
+  public async findKeywords(id: number) {
+    const topics = await this.client.findFirst({
+      where: { id },
+      include: {
+        keywords: true,
+      },
+    });
+
+    return topics;
+  }
+
+  public async create(data: IRequest) {
     data = super.removeMask(data) as IRequest;
 
     let {
@@ -42,20 +81,22 @@ export default class TopicsService extends Service {
       class_id,
     });
 
-    const actualOrder = Number.isNaN(order)
-      ? await this.repository.lastOrder(class_id) + 1
-      : order;
+    order = await this.getOrderHandled({
+      order,
+    });
 
-    let topic = await this.repository.create({
-      order: actualOrder,
-      description,
-      class_id,
+    const topic = await this.client.create({
+      data: {
+        description,
+        order,
+        class_id: Number(class_id),
+      },
     });
 
     return topic;
   }
 
-  public async update(id: number, data: IRequest): Promise<Topic | AppError | null> {
+  public async update(id: number, data: IRequest) {
     data = super.removeMask(data) as IRequest;
     let {
       description,
@@ -70,40 +111,35 @@ export default class TopicsService extends Service {
       class_id,
     });
 
-    /**
-     * 1
-     * 2
-     * 3
-     * 4
-     * 5
-     */
-
-    const actualOrder = Number.isNaN(order)
-      ? await this.repository.lastOrder(class_id) + 1
-      : await this.repository.checkOrder({ class_id, order });
-
-    let topic = await this.repository.update(id, {
-      order: actualOrder,
-      description,
-      class_id,
+    order = await this.getOrderHandled({
+      id,
+      order,
     });
 
-    if (!topic) {
-      return null;
-    }
+    let topic = await this.client.update({
+      data: {
+        description,
+        order,
+        class_id: Number(class_id),
+      },
+      where: { id },
+    });
 
     return topic;
   }
 
-  public async delete(id: number | number[] | object): Promise<any> {
-    const deleted = await this.repository.delete(id);
-    return deleted.affected;
+  public async delete(id: number) {
+    await TopicRequest.delete({ id });
+
+    const deleted = await this.client.delete({ where: { id } });
+
+    return deleted;
   }
 
-  public async findOneFullData(id: number, data: object = {}): Promise<Topic | undefined> {
-    await TopicRequest.findOneFullData({ id });
+  public async findOneFullData(id: number, data: object = {}) {
+    const topic = await this.client.findFirst({ where: { id }, ...data });
 
-    return this.repository.findOneFullData(id, data);
+    return topic;
   }
 
 }

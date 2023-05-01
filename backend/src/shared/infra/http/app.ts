@@ -9,7 +9,6 @@ import handleErrors from '@shared/infra/http/middlewares/handleErrors';
 
 import routes from './routes';
 
-import '@shared/infra/typeorm';
 import '@shared/container';
 
 const app = express();

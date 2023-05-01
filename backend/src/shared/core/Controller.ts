@@ -11,7 +11,7 @@ export default class Controller {
    * @returns id from request.
    */
   public getIdParam(req: Request): number {
-    return req.params.id as unknown as number;
+    return Number(req.params.id);
   }
 
   /**

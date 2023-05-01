@@ -1,57 +1,45 @@
 import { compare } from 'bcryptjs';
-import Joi from 'joi';
 import { sign } from 'jsonwebtoken';
 import { inject, injectable } from 'tsyringe';
 
 import Service from '@shared/core/Service';
 import AppError from '@shared/errors/AppError';
 import ErrorMessages from '@shared/errors/ErrorMessages';
-
-import ITeachersRepository from '@modules/users/repositories/ITeachersRepository';
+import client from '@shared/infra/prisma/client';
 
 import ILoginDTO from '../dtos/ILoginDTO';
 import AuthenticateRequest from '../infra/http/requests/AuthenticateRequest';
-import Student from '../infra/typeorm/entities/Student';
-import Teacher from '../infra/typeorm/entities/Teacher';
-import IStudentsRepository from '../repositories/IStudentsRepository';
 
 interface IResponseLogin {
   user: {
-    id: number,
-    name: string,
+    id: number
+    name: string
     email: string
-  },
-  token: string;
+  }
+  token: string
 }
 
 @injectable()
 export default class AuthenticationService extends Service {
 
-  constructor(
-    @inject('StudentsRepository')
-    protected studentsRepository: IStudentsRepository,
-    @inject('TeachersRepository')
-    protected teachersRepository: ITeachersRepository,
-  ) {
-    super();
-  }
+  public async login(
+    { email, password }: ILoginDTO,
+    teacherAuth: boolean,
+  ): Promise<IResponseLogin> {
+    AuthenticateRequest.protocolValidation({ email, password });
 
-  protected rules = Joi.object({
-    email: Joi.string().required().email(),
-    password: Joi.string().required(),
-  });
-
-  public async login({ email, password }: ILoginDTO, teacherAuth: boolean): Promise<IResponseLogin> {
-    await AuthenticateRequest.login({ email, password });
-
-    let user: Student | Teacher | undefined;
+    let user;
     let isTeacher: boolean = false;
 
     if (teacherAuth) {
-      user = await this.teachersRepository.findToLogin(email);
+      user = await client.teacher.findFirst({
+        where: { email },
+      });
       isTeacher = true;
     } else {
-      user = await this.repository.findToLogin(email);
+      user = await client.student.findFirst({
+        where: { email },
+      });
     }
 
     if (!user) {
@@ -70,6 +58,7 @@ export default class AuthenticationService extends Service {
       id: user.id,
       name: user.name,
       email: user.email,
+      isTeacher,
     };
 
     const token = sign({}, String(process.env.JWT_SECRET), {

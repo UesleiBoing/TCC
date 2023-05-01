@@ -1,16 +1,12 @@
-import Joi from 'joi';
+import { z } from 'zod';
 
 import Request from '@shared/core/Request';
 
-export default class AuthenticateRequest extends Request {
+export default class AuthenticationRequest extends Request {
 
-  protected static rules = Joi.object({
-    email: Joi.string().required().email(),
-    password: Joi.string().required(),
+  protected static schema = z.object({
+    email: z.string().email(),
+    password: z.string(),
   });
-
-  public static async login({ email, password }: any): Promise<void> {
-    super.protocolValidation({ email, password });
-  }
 
 }

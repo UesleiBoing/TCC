@@ -1,11 +1,14 @@
 import React from 'react';
 
-import { Grid } from '@mui/material';
+import { Checkbox, Grid } from '@mui/material';
 
 
 import Input          from 'components/Form/Input';
 import Select         from 'components/Form/Select';
 
+import ICheckboxProps from '../Checkbox/ICheckboxProps';
+import Dropzone       from '../Dropzone';
+import IDropzoneProps from '../Dropzone/IDropzoneProps';
 import IInputProps    from '../Input/IInputProps';
 import ISelectProps   from '../Select/ISelectProps';
 
@@ -32,6 +35,14 @@ const FormBuilder: React.FC<IProps> = ({
       return <Select {...field as ISelectProps} />;
     }
 
+    if (field.type === 'dropzone') {
+      return <Dropzone {...field as IDropzoneProps} />;
+    }
+
+    if (field.type === 'checkbox') {
+      return <Checkbox {...field as ICheckboxProps} />;
+    }
+    
     return <Input {...field as IInputProps} />;
   }
 

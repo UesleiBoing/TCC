@@ -5,8 +5,8 @@ import AppError from '@shared/errors/AppError';
 import ErrorMessages from '@shared/errors/ErrorMessages';
 import CommunicationHelper from '@shared/helpers/CommunicationHelper';
 import TokenHelper from '@shared/helpers/TokenHelper';
+import client from '@shared/infra/prisma/client';
 
-import Teacher from '@modules/users/infra/typeorm/entities/Teacher';
 import TeachersService from '@modules/users/services/TeachersService';
 
 /**
@@ -34,11 +34,7 @@ export default async function ensureAuthenticationTeacher(
   try {
     const pointToken = TokenHelper.getSubject(String(TokenHelper.getToken(request)));
 
-    let pointsService: TeachersService | undefined;
-
-    if (pointToken.isTeacher) {
-      pointsService = container.resolve(TeachersService);
-    } else {
+    if (!pointToken.isTeacher) {
       return response.status(401).json(
         CommunicationHelper.error(
           new AppError(ErrorMessages.INVALID_LOGIN_ATTEMPT, 422),
@@ -46,7 +42,10 @@ export default async function ensureAuthenticationTeacher(
       );
     }
 
-    const point: Teacher | undefined = await pointsService.findOne(pointToken.id);
+    const point = await client.teacher.findFirst({
+      where: { id: pointToken.id },
+    });
+
     if (!point) {
       return response.status(401).json(
         CommunicationHelper.error(

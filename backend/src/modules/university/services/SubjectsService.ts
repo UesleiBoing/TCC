@@ -1,14 +1,13 @@
-import { hash } from 'bcryptjs';
-import { container, inject, injectable } from 'tsyringe';
+import { Subject } from '@prisma/client';
+import { inject, injectable } from 'tsyringe';
 
 import Service from '@shared/core/Service';
-import AppError from '@shared/errors/AppError';
+import client from '@shared/infra/prisma/client';
 
 import SubjectRequest from '../infra/http/requests/SubjectRequest';
-import Subject from '../infra/typeorm/entities/Subject';
-import ISubjectsRepository from '../repositories/ISubjectsRepository';
 
 interface IRequest {
+  id?: number;
   title: string;
   content: string;
 }
@@ -16,70 +15,88 @@ interface IRequest {
 @injectable()
 export default class SubjectsService extends Service {
 
-  constructor(
-    @inject('SubjectsRepository')
-    protected repository: ISubjectsRepository,
-  ) {
-    super();
+  client = client.subject;
+
+  public async findById(id: number) {
+    const subject = await this.client.findFirst({ where: { id } });
+
+    return subject;
   }
 
-  public entity = Subject;
+  public async findAll(data: object = {}): Promise<Subject[]> {
+    const subjects = await super.findAll(data);
 
-  public async create(data: IRequest): Promise<Subject> {
-    data = super.removeMask(data) as IRequest;
+    return subjects;
+  }
 
-    let {
-      title,
-      content,
-    } = data;
-
-    await SubjectRequest.create({
-      title,
-      content,
+  public async findByStudent(student_id: number) {
+    const subjects = await this.client.findMany({
+      include: {
+        classes: true,
+      },
+      where: {
+        classes: {
+          every: {
+            classes_students: {
+              every: {
+                student_id,
+              },
+            },
+          },
+        },
+      },
     });
 
-    let subject = await this.repository.create({
-      title,
-      content,
+    return subjects;
+  }
+
+  public async create(data: IRequest) {
+    data = super.removeMask(data) as IRequest;
+
+    let { title, content } = data;
+
+    await SubjectRequest.create({ title, content });
+
+    const subject = await this.client.create({
+      data: {
+        title,
+        content,
+      },
     });
 
     return subject;
   }
 
-  public async update(id: number, data: IRequest): Promise<Subject | AppError | null> {
+  public async update(id: number, data: IRequest) {
     data = super.removeMask(data) as IRequest;
-    let {
-      title,
-      content,
-    } = data;
 
-    await SubjectRequest.update({
-      id,
-      title,
-      content,
+    let { title, content } = data;
+
+    await SubjectRequest.update({ id, title, content });
+
+    const subject = await this.client.update({
+      data: {
+        title,
+        content,
+      },
+      where: { id },
     });
-
-    let subject = await this.repository.update(id, {
-      title,
-      content,
-    });
-
-    if (!subject) {
-      return null;
-    }
 
     return subject;
   }
 
-  public async delete(id: number | number[] | object): Promise<any> {
-    const deleted = await this.repository.delete(id);
-    return deleted.affected;
+  public async delete(id: number) {
+    await SubjectRequest.delete({ id });
+
+    const deleted = await this.client.delete({ where: { id } });
+
+    return deleted;
   }
 
-  public async findOneFullData(id: number, data: object = {}): Promise<Subject | undefined> {
-    await SubjectRequest.findOneFullData({ id });
+  public async findOneFullData(id: number, data: object = {}) {
+    const subject = await this.client.findFirst({ where: { id }, ...data });
 
-    return this.repository.findOneFullData(id, data);
+    return subject;
   }
 
 }

@@ -18,7 +18,7 @@ export default class FormsController extends Controller {
 
   public async find(req: Request, res: Response): Promise<Response> {
     const service = container.resolve(FormsService);
-    const result = await service.findPagination(req);
+    const result = await service.findAll();
 
     return res.status(200).json(result);
   }
@@ -27,7 +27,32 @@ export default class FormsController extends Controller {
     const id = super.getIdParam(req);
 
     const service = container.resolve(FormsService);
-    const result = await service.findOneFullData(id);
+
+    const result = await service.findById(id, {
+      questions: req.query.questions as string | undefined,
+      answers: req.query.answers as string | undefined,
+    });
+
+    return res.status(200).json(result);
+  }
+
+  public async findByTopic(req: Request, res: Response): Promise<Response> {
+
+    const service = container.resolve(FormsService);
+    const topic_id = req.params.topic_id as string | undefined;
+
+    const result = await service.findByTopic({
+      topic_id: Number(topic_id),
+    });
+
+    return res.status(200).json(result);
+  }
+
+  public async generate(req: Request, res: Response): Promise<Response> {
+
+    const service = container.resolve(FormsService);
+
+    const result = await service.generate(req.body);
 
     return res.status(200).json(result);
   }

@@ -1,91 +1,191 @@
-import { hash } from 'bcryptjs';
-import { container, inject, injectable } from 'tsyringe';
+import {
+  Answer, Class, Question, StudentAnswers, Test,
+} from '@prisma/client';
+import { injectable } from 'tsyringe';
 
 import Service from '@shared/core/Service';
-import AppError from '@shared/errors/AppError';
+import client from '@shared/infra/prisma/client';
 
-import TestRequest from '../infra/http/requests/TestRequest';
-import Test from '../infra/typeorm/entities/Test';
-import ITestsRepository from '../repositories/ITestsRepository';
+import TYPE_QUESTION from '../enums/TypeQuestion';
 
-interface IRequest {
-  grade: number;
-  student_id: number;
-  form_id: number;
+import QuestionsService from './QuestionsService';
+
+interface IRequestTest {
+  form_id: number
+  student_id: number
+  answers: IRequestAnswer[]
+}
+
+interface IRequestAnswer {
+  question_id: number
+  description: string | number | number[]
 }
 
 @injectable()
 export default class TestsService extends Service {
 
-  constructor(
-    @inject('TestsRepository')
-    protected repository: ITestsRepository,
-  ) {
+  constructor(private questionsService: QuestionsService) {
     super();
   }
 
-  public entity = Test;
+  client = client.test;
 
-  public async create(data: IRequest): Promise<Test> {
-    data = super.removeMask(data) as IRequest;
-    let {
-      grade,
-      student_id,
-      form_id,
-    } = data;
-
-    await TestRequest.create({
-      grade,
-      student_id,
-      form_id,
+  public async findById(id: number) {
+    const test = await this.client.findFirst({
+      where: { id },
     });
 
-    let object = await this.repository.create({
-      grade,
-      student_id,
-      form_id,
-    });
-
-    return object;
+    return test;
   }
 
-  public async update(id: number, data: IRequest): Promise<Test | AppError | null> {
-    data = super.removeMask(data) as IRequest;
-    let {
-      grade,
-      student_id,
-      form_id,
-    } = data;
+  public async findAll(data: object = {}) {
+    const tests = await super.findAll(data);
 
-    await TestRequest.update({
-      id,
-      grade,
-      student_id,
-      form_id,
-    });
+    return tests;
+  }
 
-    let object = await this.repository.update(id, {
-      grade,
-      student_id,
-      form_id,
-    });
+  public handleGradeOfMultipleAlternative({
+    answer,
+    question,
+  }: {
+    answer: StudentAnswers & {
+      question: Question | null
+    }
+    question: Question
+  }) {
+    const awnserArray = answer.description.split(', ');
 
-    if (!object) {
-      return null;
+    if (!question.correct_answer) {
+      return question.weight.toNumber();
     }
 
-    return object;
+    const questionCorrectAnswer = question.correct_answer.split(', ');
+
+    const sumCorrectAwnsers = awnserArray.reduce((accumulator, awnser) => {
+      accumulator += questionCorrectAnswer.includes(awnser) ? 1 : -1;
+      return accumulator;
+    }, 0);
+
+    const finalGrade = sumCorrectAwnsers > 0
+      ? question.weight.toNumber() * (sumCorrectAwnsers / questionCorrectAnswer.length)
+      : 0;
+
+    return finalGrade;
   }
 
-  public async delete(id: number | number[] | object): Promise<any> {
-    const deleted = await this.repository.delete(id);
-    return deleted.affected;
+  public generateGrade(
+    test: Test & {
+      studentAnswers: (StudentAnswers & {
+        question: Question | null
+      })[]
+    },
+  ) {
+    let actualGrade = 0;
+    let totalPoints = 0;
+    let possibleOfCorrectGrade = 0;
+
+    test.studentAnswers.forEach((answer) => {
+      const { question } = answer;
+
+      if (!question) {
+        return;
+      }
+
+      totalPoints += question.weight.toNumber();
+
+      if (question.type !== TYPE_QUESTION.DISCURSIVE || question.correct_answer) {
+        possibleOfCorrectGrade += question.weight.toNumber();
+      }
+
+      if (question.type === TYPE_QUESTION.MULTIPLE_ALTERNATIVE) {
+        const pointsQuestion = this.handleGradeOfMultipleAlternative({
+          answer,
+          question,
+        });
+
+        actualGrade += pointsQuestion;
+
+        return;
+      }
+
+      if (answer.description === question.correct_answer) {
+        actualGrade += question.weight.toNumber();
+      }
+    });
+
+    return {
+      grade: actualGrade,
+      possibleOfCorrectGrade,
+      totalPoints,
+    };
   }
 
-  public async findOneFullData(id: number, data: object = {}): Promise<Test | undefined> {
-    await TestRequest.findOneFullData({ id });
+  public async create(data: IRequestTest) {
+    data = super.removeMask(data) as IRequestTest;
 
-    return this.repository.findOneFullData(id, data);
+    const { form_id, student_id, answers } = data;
+
+    let test = await this.client.create({
+      data: {
+        form_id,
+        student_id,
+        studentAnswers: {
+          create: answers.map(({ description, question_id }) => {
+            if (Array.isArray(description)) {
+              description = description.join(', ');
+            }
+
+            return {
+              description: description.toString(),
+              question_id,
+            };
+          }),
+        },
+      },
+
+      include: {
+        studentAnswers: {
+          include: {
+            question: true,
+          },
+        },
+      },
+    });
+
+    const {
+      grade,
+      possibleOfCorrectGrade,
+      totalPoints,
+    } = this.generateGrade(test);
+
+    const testUpdated = await this.client.update({
+      data: {
+        grade,
+      },
+      where: { id: test.id },
+    });
+
+    return {
+      grade,
+      possibleOfCorrectGrade,
+      totalPoints,
+      test: {
+        ...test,
+        ...testUpdated,
+      },
+    };
   }
+
+  // public async findOneFullData(id: number, data: object = {}) {
+  //   const test = await this.client.findFirst({
+  //     where: { id },
+  //     include: {
+  //       answers: true,
+  //     },
+  //     ...data,
+  //   });
+
+  //   return test;
+  // }
 
 }

@@ -1,49 +1,41 @@
 import { Request as RequestExpress } from 'express';
-import Joi from 'joi';
+import { z } from 'zod';
 
 import AppError from '@shared/errors/AppError';
-import ErrorMessages from '@shared/errors/ErrorMessages';
-import TokenHelper from '@shared/helpers/TokenHelper';
-import ValidationHelper from '@shared/helpers/ValidationHelper';
-import IFiles from '@shared/interfaces/IFiles';
+
+import ErrorMessages from '../errors/ErrorMessages';
+import TokenHelper from '../helpers/TokenHelper';
+import IFiles from '../interfaces/IFiles';
 
 export default abstract class Request {
 
   /**
    * Rules properties to validate.
    */
-  protected static rulesId: Joi.ObjectSchema<any> = Joi.object({ id: Joi.number().required() });
+  protected static idSchema: z.ZodObject<any> = z.object({ id: z.number() });
 
-  protected static rules: Joi.ObjectSchema<any> = Joi.object({});
+  protected static schema: z.ZodObject<any> = z.object({});
 
   /**
-   * Function to validate if ID is number
-   * @param id - Id to validate.
+   * Validate that the given id attribute value is of type number
+   * @param id - The id attribute to validate
    */
-  public static checkId(id:number): void {
-    const { error } = this.rulesId.validate({ id });
-
-    if (error) {
-      throw new AppError(ErrorMessages.ID_NOT_NUMBER);
-    }
+  public static checkId(id: number): void {
+    this.idSchema.parse({ id });
   }
 
   /**
-   * Validate rules of request.
-   * @param data - Data to validate.
-   * @param altValidation - Alternative validation Joi.ObjectSchema<any>.
+   * Validate the given data object with the baseSchema or an optional customized schema
+   * @param data - The data object to validate
+   * @param customSchema - An optional Zod schema object to be used instead of the default one
    */
   public static protocolValidation(
     data: any,
-    altValidation: Joi.ObjectSchema<any> | undefined = undefined,
+    customSchema?: z.ZodObject<any>,
   ): void {
-    const rules = altValidation || this.rules;
+    const schema = customSchema || this.schema;
 
-    const { error } = rules.validate(data);
-
-    if (error) {
-      throw new AppError(ValidationHelper.getJoiErrorMessage(error));
-    }
+    const { error } = schema.parse(data);
   }
 
   /**
@@ -53,14 +45,14 @@ export default abstract class Request {
   public static async create(data: any): Promise<void> {
     this.protocolValidation(data);
 
-    await this.rulesCreate(data);
+    await this.customCreateValidation(data);
   }
 
   /**
-   * Validate specific rules of create request.
-   * @param data - Data to validate.
+   * Hook method to accept custom create request validation
+   * @param data - The data to be used for the custom validation
    */
-  public static async rulesCreate(data: any): Promise<void> {
+  public static async customCreateValidation(data: any): Promise<void> {
     // do nothing
   }
 
@@ -70,27 +62,26 @@ export default abstract class Request {
    */
   public static async update({ id, ...data }: any): Promise<void> {
     this.checkId(id);
-
     this.protocolValidation(data);
 
-    await this.rulesUpdate({ id, ...data });
+    await this.customUpdateValidation({ id, ...data });
   }
 
   /**
    * Specific rules to validate update request.
    * @param data - Data to validate.
    */
-  public static async rulesUpdate(data: any): Promise<void> {
+  public static async customUpdateValidation(data: any): Promise<void> {
     // do nothing
   }
 
   /**
-   * Check if request.files has files
+   * Check if request.files has files.
    * @param files - request.files as IFiles[].
    */
   public static haveFiles(files: IFiles[]): void {
     if (!Array.isArray(files) || files.length === 0) {
-      throw new AppError(ErrorMessages.FILE_DOESNT_EXIST, 422);
+      throw new AppError(ErrorMessages.FILE_DOESNT_EXIST);
     }
   }
 
@@ -99,22 +90,26 @@ export default abstract class Request {
    * @param id - Id to validate.
    * @param req - RequestExpress.
    */
-  public static isTokenOwner(id:number, req: RequestExpress | string) {
+  public static isTokenOwner(id: number, req: RequestExpress): boolean {
     const tokenSubject = TokenHelper.getSubject(req);
 
-    if (id !== tokenSubject.id) {
-      throw new AppError(ErrorMessages.INVALID_LOGIN_ATTEMPT, 401);
+    if (id !== tokenSubject?.id) {
+      throw new AppError(ErrorMessages.INVALID_LOGIN_ATTEMPT);
     }
 
     return true;
   }
 
   /**
-   * Validate default rules of findOneFullData method
-   * By default, only id is required, but more propertys can be passed.
+   * Validate default rules of findOneFullData method.
+   * By default, only id is required, but more properties can be passed.
    * @param data - Data to validate.
    */
   public static async findOneFullData({ id }: any): Promise<void> {
+    this.checkId(id);
+  }
+
+  public static async delete({ id }: any): Promise<void> {
     this.checkId(id);
   }
 

@@ -5,8 +5,8 @@ import AppError from '@shared/errors/AppError';
 import ErrorMessages from '@shared/errors/ErrorMessages';
 import CommunicationHelper from '@shared/helpers/CommunicationHelper';
 import TokenHelper from '@shared/helpers/TokenHelper';
+import client from '@shared/infra/prisma/client';
 
-import Student from '@modules/users/infra/typeorm/entities/Student';
 import StudentsService from '@modules/users/services/StudentsService';
 
 /**
@@ -21,6 +21,7 @@ export default async function ensureAuthenticationStudents(
   response: Response,
   next: NextFunction,
 ) {
+
   const authHeader: string | undefined = request.headers.authorization;
 
   if (!authHeader) {
@@ -34,11 +35,7 @@ export default async function ensureAuthenticationStudents(
   try {
     const userToken = TokenHelper.getSubject(String(TokenHelper.getToken(request)));
 
-    let usersService: StudentsService | undefined;
-
-    if (!userToken.isTeacher) {
-      usersService = container.resolve(StudentsService);
-    } else {
+    if (userToken.isTeacher) {
       return response.status(401).json(
         CommunicationHelper.error(
           new AppError(ErrorMessages.INVALID_LOGIN_ATTEMPT, 422),
@@ -46,7 +43,12 @@ export default async function ensureAuthenticationStudents(
       );
     }
 
-    const user: Student | undefined = await usersService.findOne(userToken.id);
+    const user = await client.student.findFirst({
+      where: {
+        id: userToken.id,
+      },
+    });
+
     if (!user) {
       return response.status(401).json(
         CommunicationHelper.error(

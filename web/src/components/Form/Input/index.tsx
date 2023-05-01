@@ -92,7 +92,7 @@ const Input: React.FC<IInputProps> = ({
       if (Icon) {
         return (
           <InputAdornment position="start">
-            <Icon color={'#2e7e62'} size={20}/>
+            <Icon color={'#2196f3'} size={20}/>
           </InputAdornment>
         );
       }

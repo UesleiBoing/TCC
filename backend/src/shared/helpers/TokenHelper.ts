@@ -58,8 +58,8 @@ export default class TokenHelper {
    * @param token - Token.
    * @returns boolean if is point.
    */
-  public static isPointToken(token: string): boolean {
-    return this.getSubject(token).isPoint;
+  public static isTeacherToken(token: string): boolean {
+    return this.getSubject(token).isTeacher;
   }
 
 }

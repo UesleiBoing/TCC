@@ -28,6 +28,7 @@ const Drawer:React.FC<IProps> = ({ setOpen, open })  =>{
     <MUIDrawer
       sx={{
         width: drawerWidth,
+        position: 'absolute',
         flexShrink: 0,
         '& .MuiDrawer-paper': {
           width: drawerWidth,
@@ -43,7 +44,7 @@ const Drawer:React.FC<IProps> = ({ setOpen, open })  =>{
           {theme.direction === 'ltr' ? <ChevronLeftIcon /> : <ChevronRightIcon />}
         </IconButton>
       </DrawerHeader>
-      <List open={open}/>
+      <List open={open} handleDrawerClose={handleDrawerClose} />
     </MUIDrawer>
   );
 }

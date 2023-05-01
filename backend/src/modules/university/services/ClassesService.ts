@@ -1,12 +1,11 @@
-import { hash } from 'bcryptjs';
-import { container, inject, injectable } from 'tsyringe';
+import { Class } from '@prisma/client';
+import { injectable } from 'tsyringe';
 
 import Service from '@shared/core/Service';
-import AppError from '@shared/errors/AppError';
+import client from '@shared/infra/prisma/client';
 
+import ITeacherDTO from '../../users/dtos/ITeacherDTO';
 import ClassRequest from '../infra/http/requests/ClassRequest';
-import Classe from '../infra/typeorm/entities/Classe';
-import IClassesRepository from '../repositories/IClassesRepository';
 
 interface IRequest {
   title: string;
@@ -15,21 +14,94 @@ interface IRequest {
   semester: number;
   teacher_id: number;
   subject_id: number;
+  students: number[];
 }
 
 @injectable()
 export default class ClassesService extends Service {
 
-  constructor(
-    @inject('ClassesRepository')
-    protected repository: IClassesRepository,
-  ) {
-    super();
+  client = client.class;
+
+  public async findById(id: number) {
+    const classe = await this.client.findFirst({
+      where: { id },
+
+      include: {
+        subject: true,
+        teacher: {
+          select: {
+            id: true,
+            email: true,
+            name: true,
+          },
+        },
+        classes_students: {
+          include: {
+            student: {
+              select: {
+                id: true,
+                email: true,
+                name: true,
+              },
+            },
+          },
+        },
+      },
+    });
+
+    return classe;
   }
 
-  public entity = Classe;
+  public async findByStudent(student_id: number) {
+    const subjects = await this.client.findMany({
+      include: {
+        subject: true,
+        teacher: {
+          select: {
+            id: true,
+            email: true,
+            name: true,
+          },
+        },
+      },
+      where: {
+        classes_students: {
+          every: {
+            student_id,
+          },
+        },
+      },
+    });
 
-  public async create(data: IRequest): Promise<Classe> {
+    return subjects;
+  }
+
+  public async findAll(data: object = {}): Promise<Class[]> {
+    const classes = await super.findAll({
+      include: {
+        teacher: true,
+        subject: true,
+      },
+    });
+
+    return classes;
+  }
+
+  public prepareStudents(students?: number[]) {
+    if (!students) {
+      return {};
+    }
+
+    return {
+      classes_students: {
+        createMany: {
+          data: students.map((student) => ({ student_id: student })),
+        },
+      },
+    };
+  }
+
+  public async create(data: IRequest): Promise<Class> {
     data = super.removeMask(data) as IRequest;
 
     let {
@@ -39,6 +111,7 @@ export default class ClassesService extends Service {
       semester,
       teacher_id,
       subject_id,
+      students,
     } = data;
 
     await ClassRequest.create({
@@ -50,20 +123,37 @@ export default class ClassesService extends Service {
       subject_id,
     });
 
-    let classe = await this.repository.create({
-      title,
-      content,
-      year,
-      semester,
-      teacher_id,
-      subject_id,
+    const classe = await this.client.create({
+      data: {
+        title,
+        content,
+        year: year.toString(),
+        semester: semester.toString(),
+        teacher_id,
+        subject_id,
+        ...this.prepareStudents(students),
+      },
+      include: {
+        classes_students: {
+          select: {
+            student: {
+              select: {
+                id: true,
+                email: true,
+                name: true,
+              },
+            },
+          },
+        },
+      },
     });
 
     return classe;
   }
 
-  public async update(id: number, data: IRequest): Promise<Classe | AppError | null> {
+  public async update(id: number, data: IRequest): Promise<Class> {
     data = super.removeMask(data) as IRequest;
+
     let {
       title,
       content,
@@ -71,6 +161,7 @@ export default class ClassesService extends Service {
       semester,
       teacher_id,
       subject_id,
+      students,
     } = data;
 
     await ClassRequest.update({
@@ -83,31 +174,55 @@ export default class ClassesService extends Service {
       subject_id,
     });
 
-    let classe = await this.repository.update(id, {
-      title,
-      content,
-      year,
-      semester,
-      teacher_id,
-      subject_id,
-    });
-
-    if (!classe) {
-      return null;
+    if (students) {
+      await client.classStudent.deleteMany({
+        where: {
+          class_id: id,
+        },
+      });
     }
+
+    const classe = await this.client.update({
+      data: {
+        title,
+        content,
+        year: year.toString(),
+        semester: semester.toString(),
+        teacher_id,
+        subject_id,
+        ...this.prepareStudents(students),
+      },
+      include: {
+        classes_students: {
+          select: {
+            student: {
+              select: {
+                id: true,
+                email: true,
+                name: true,
+              },
+            },
+          },
+        },
+      },
+      where: { id },
+    });
 
     return classe;
   }
 
-  public async delete(id: number | number[] | object): Promise<any> {
-    const deleted = await this.repository.delete(id);
-    return deleted.affected;
+  public async delete(id: number) {
+    await ClassRequest.delete({ id });
+
+    const deleted = await this.client.delete({ where: { id } });
+
+    return deleted;
   }
 
-  public async findOneFullData(id: number, data: object = {}): Promise<Classe | undefined> {
-    await ClassRequest.findOneFullData({ id });
+  public async findOneFullData(id: number, data: object = {}) {
+    const classe = await this.client.findFirst({ where: { id }, ...data });
 
-    return this.repository.findOneFullData(id, data);
+    return classe;
   }
 
 }

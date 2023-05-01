@@ -1,0 +1,226 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Answer {
+  id          Int     @id() @default(autoincrement())
+  description String  @db.VarChar(400)
+  order       Int?
+  value       Int?
+
+  question_id Int
+
+  created_at DateTime @default(now()) @db.Timestamp(6)
+  updated_at DateTime @default(now()) @db.Timestamp(6)
+
+  question Question? @relation(fields: [question_id], references: [id], onDelete: Cascade)
+
+  @@map("answers")
+}
+
+model StudentAnswers {
+  id          Int    @id() @default(autoincrement())
+  description String @db.VarChar(400)
+
+  question_id Int
+  test_id     Int
+
+  created_at DateTime @default(now()) @db.Timestamp(6)
+  updated_at DateTime @default(now()) @db.Timestamp(6)
+
+  question Question? @relation(fields: [question_id], references: [id])
+  test     Test?     @relation(fields: [test_id], references: [id])
+
+  @@map("student_answers")
+}
+
+model Class {
+  id         Int    @id() @default(autoincrement())
+  title      String @db.VarChar(80)
+  content    String @db.VarChar(300)
+  year       String @db.VarChar(4)
+  semester   String @db.VarChar(1)
+  teacher_id Int
+  subject_id Int
+
+  created_at DateTime @default(now()) @db.Timestamp(6)
+  updated_at DateTime @default(now()) @db.Timestamp(6)
+
+  subject Subject @relation(fields: [subject_id], references: [id])
+  teacher Teacher @relation(fields: [teacher_id], references: [id])
+
+  classes_students ClassStudent[]
+  topics           Topic[]
+  @@unique([title, year, semester, teacher_id, subject_id], name: "classUnique")
+  @@map("classes")
+}
+
+model ClassStudent {
+  id         Int @id() @default(autoincrement())
+  class_id   Int
+  student_id Int
+
+  classe  Class   @relation(fields: [class_id], references: [id], onDelete: Cascade)
+  student Student @relation(fields: [student_id], references: [id], onDelete: Cascade) 
+
+  @@index([class_id])
+  @@index([student_id])
+  @@map("classes_studentes")
+}
+
+model Form {
+  id          Int     @id() @default(autoincrement())
+  title       String  @db.VarChar(80)
+  description String? @db.VarChar(300)
+
+  order    Int
+  topic_id Int
+
+  created_at DateTime @default(now()) @db.Timestamp(6)
+  updated_at DateTime @default(now()) @db.Timestamp(6)
+
+  topic     Topic?     @relation(fields: [topic_id], references: [id])
+  formQuestions FormQuestion[]
+  tests     Test[]
+
+  @@map("forms")
+}
+
+model FormQuestion {
+  id         Int @id() @default(autoincrement())
+  form_id    Int
+  question_id Int
+
+  form     Form     @relation(fields: [form_id], references: [id], onDelete: Cascade)
+  question Question @relation(fields: [question_id], references: [id], onDelete: Cascade)
+
+  @@index([form_id])
+  @@index([question_id])
+  @@map("forms_questions")
+}
+model Question {
+  id             Int     @id() @default(autoincrement())
+  description    String  @db.VarChar(300)
+  type           Int     @default(0)
+  weight         Decimal @default(1) @db.Decimal(3, 2)
+  correct_answer String? @db.VarChar
+  order          Int?
+
+  created_at DateTime @default(now()) @db.Timestamp(6)
+  updated_at DateTime @default(now()) @db.Timestamp(6)
+
+  answers        Answer[]
+  forms          FormQuestion[]            @relation()
+  StudentAnswers StudentAnswers[]
+  keywordQuestions KeywordQuestion[]
+
+
+  @@map("questions")
+}
+
+model Student {
+  id       Int    @id() @default(autoincrement())
+  name     String @db.VarChar(100)
+  email    String @unique() @db.VarChar(80)
+  password String @db.VarChar(80)
+
+  created_at DateTime @default(now()) @db.Timestamp(6)
+  updated_at DateTime @default(now()) @db.Timestamp(6)
+
+  classes_students ClassStudent[]
+  tests            Test[]
+
+  @@map("students")
+}
+
+model KeywordQuestion {
+  id         Int @id() @default(autoincrement())
+  keyword_id    Int
+  question_id Int
+
+  keyword  Keyword  @relation(fields: [keyword_id], references: [id], onDelete: Cascade)
+  question Question @relation(fields: [question_id], references: [id], onDelete: Cascade)
+
+  @@index([keyword_id])
+  @@index([question_id])
+  @@map("keywords_questions")
+}
+
+model Keyword {
+  id      Int    @id() @default(autoincrement())
+  description   String @db.VarChar(40)
+  topic_id Int
+
+  created_at DateTime @default(now()) @db.Timestamp(6)
+  updated_at DateTime @default(now()) @db.Timestamp(6)
+
+  topic Topic? @relation(fields: [topic_id], references: [id])
+  keywordQuestions KeywordQuestion[]
+
+  @@unique([description, topic_id], name: "keywordUnique")
+  @@map("keywords")
+}
+
+model Subject {
+  id      Int    @id() @default(autoincrement())
+  title   String @unique() @db.VarChar(80)
+  content String @db.VarChar(300)
+
+  created_at DateTime @default(now()) @db.Timestamp(6)
+  updated_at DateTime @default(now()) @db.Timestamp(6)
+
+  classes Class[]
+
+  @@map("subjects")
+}
+
+model Teacher {
+  id       Int    @id() @default(autoincrement())
+  name     String @db.VarChar(100)
+  email    String @unique() @db.VarChar(80)
+  password String @db.VarChar(80)
+
+  created_at DateTime @default(now()) @db.Timestamp(6)
+  updated_at DateTime @default(now()) @db.Timestamp(6)
+
+  classes Class[]
+
+  @@map("teachers")
+}
+
+model Test {
+  id         Int      @id() @default(autoincrement())
+  grade      Decimal? @db.Decimal(4, 2)
+  form_id    Int
+  student_id Int
+
+  created_at DateTime @default(now()) @db.Timestamp(6)
+  updated_at DateTime @default(now()) @db.Timestamp(6)
+
+  students       Student?         @relation(fields: [student_id], references: [id])
+  forms          Form?            @relation(fields: [form_id], references: [id])
+  studentAnswers StudentAnswers[]
+
+  @@map("tests")
+}
+
+model Topic {
+  id          Int    @id() @default(autoincrement())
+  description String @db.VarChar(300)
+  order       Int
+  class_id    Int?
+
+  created_at DateTime @default(now()) @db.Timestamp(6)
+  updated_at DateTime @default(now()) @db.Timestamp(6)
+
+  forms   Form[]
+  classes Class? @relation(fields: [class_id], references: [id])
+  keywords Keyword[]
+
+  @@map("topics")
+}

@@ -1,12 +1,12 @@
-import Joi from 'joi';
+import { z } from 'zod';
 
 import Request from '@shared/core/Request';
 
 export default class SubjectRequest extends Request {
 
-  protected static rules: Joi.ObjectSchema<any> = Joi.object({
-    title: Joi.string().required(),
-    content: Joi.string().required(),
+  protected static schema = z.object({
+    title: z.string(),
+    content: z.string(),
   });
 
 }

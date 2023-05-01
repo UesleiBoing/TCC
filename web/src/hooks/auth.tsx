@@ -6,6 +6,7 @@ interface IUser {
   id: string;
   name: string;
   email: string;
+  isTeacher: boolean;
 }
 
 interface IAuthState {
@@ -16,26 +17,29 @@ interface IAuthState {
 interface ISignInCredentials {
   email: string;
   password: string;
+  isTeacher: boolean;
 }
 
 interface IAuthContextData {
   user: IUser;
   signIn(credentials: ISignInCredentials): Promise<void>;
   signOut(): void;
+  isTeacher(): boolean;
   updateUser(user: IUser): void;
 }
 
 interface IRequestSignIn {
   email: string;
   password: string;
+  isTeacher: boolean;
 }
 
 const AuthContext = createContext<IAuthContextData>({} as IAuthContextData);
 
 export const AuthProvider: React.FC<PropsWithChildren<{}>> = ({ children }) => {
   const [data, setData] = useState<IAuthState>(() => {
-    const token = localStorage.getItem('@PFCLI:token');
-    const user = localStorage.getItem('@PFCLI:user');
+    const token = localStorage.getItem('@AFONSO:token');
+    const user = localStorage.getItem('@AFONSO:user');
 
     if (token && user) {
       api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
@@ -45,8 +49,10 @@ export const AuthProvider: React.FC<PropsWithChildren<{}>> = ({ children }) => {
     return {} as IAuthState;
   });
 
-  const signIn = useCallback(async ({ email, password }: IRequestSignIn) => {
-    const response = await api.post('/login', { email, password });
+  const signIn = useCallback(async ({ email, password, isTeacher }: IRequestSignIn) => {
+
+    let isTeacherLogin = isTeacher ? '?isTeacher=true' : '';
+    const response = await api.post(`/login${isTeacherLogin}`, { email, password, isTeacher });
     const { token, user } = response.data;
    
     localStorage.setItem('@AFONSO:token', token);
@@ -64,6 +70,18 @@ export const AuthProvider: React.FC<PropsWithChildren<{}>> = ({ children }) => {
 
     setData({} as IAuthState);
   }, []);
+  
+  const isTeacher = useCallback(() => {
+    const user = localStorage.getItem('@AFONSO:user');
+    
+    if (user) {
+      const userParsed = JSON.parse(user) as IUser;
+
+      return !!userParsed.isTeacher;
+    }
+
+    return false;
+  }, []);
 
   const updateUser = useCallback(
     (user: IUser) => {
@@ -79,7 +97,7 @@ export const AuthProvider: React.FC<PropsWithChildren<{}>> = ({ children }) => {
 
   return (
     <AuthContext.Provider
-      value={{ user: data.user, signIn, signOut, updateUser }}
+      value={{ user: data.user, signIn, signOut, isTeacher, updateUser }}
     >
       {children}
     </AuthContext.Provider>

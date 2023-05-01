@@ -18,7 +18,7 @@ export default class SubjectsController extends Controller {
 
   public async find(req: Request, res: Response): Promise<Response> {
     const service = container.resolve(SubjectsService);
-    const result = await service.findPagination(req);
+    const result = await service.findAll();
 
     return res.status(200).json(result);
   }
@@ -32,10 +32,19 @@ export default class SubjectsController extends Controller {
     return res.status(200).json(result);
   }
 
+  public async findByStudent(req: Request, res: Response): Promise<Response> {
+    const student_id = Number(req.params.student_id);
+
+    SubjectRequest.isTokenOwner(student_id, req);
+
+    const service = container.resolve(SubjectsService);
+    const result = await service.findByStudent(student_id);
+
+    return res.status(200).json(result);
+  }
+
   public async update(req: Request, res: Response): Promise<Response> {
     const id = super.getIdParam(req);
-
-    SubjectRequest.isTokenOwner(id, req);
 
     const service = container.resolve(SubjectsService);
     const result = await service.update(id, req.body);

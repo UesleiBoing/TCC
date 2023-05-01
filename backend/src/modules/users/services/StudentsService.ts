@@ -1,100 +1,113 @@
+import { Student } from '@prisma/client';
 import { hash } from 'bcryptjs';
-import { container, inject, injectable } from 'tsyringe';
+import { inject, injectable } from 'tsyringe';
 
 import Service from '@shared/core/Service';
-import AppError from '@shared/errors/AppError';
+import client from '@shared/infra/prisma/client';
 
+import StudentDTO from '../dtos/IStudentDTO';
 import StudentRequest from '../infra/http/requests/StudentRequest';
-import Student from '../infra/typeorm/entities/Student';
-import IStudentsRepository from '../repositories/IStudentsRepository';
 
 interface IRequest {
-  name: string;
-  cpf: string;
+  id?: number;
   email: string;
+  name: string;
   password: string;
 }
 
 @injectable()
 export default class StudentsService extends Service {
 
-  constructor(
-    @inject('StudentsRepository')
-    protected repository: IStudentsRepository,
-  ) {
-    super();
+  client = client.student;
+
+  public async findById(id: number) {
+    const student = await this.client.findFirst({ where: { id } });
+
+    return student;
   }
 
-  public entity = Student;
+  public async findAll(data: object = {}): Promise<Student[]> {
+    const students = await super.findAll(data);
 
-  public async create(data: IRequest): Promise<Student> {
+    return students;
+  }
+
+  public async create(data: IRequest) {
     data = super.removeMask(data) as IRequest;
+
     let {
-      name,
       email,
+      name,
       password,
     } = data;
 
     await StudentRequest.create({
-      name,
       email,
+      name,
       password,
     });
 
     const passwordHash = await hash(password, 8);
 
-    let user = await this.repository.create({
-      name,
-      email,
-      password: passwordHash,
+    const student = await this.client.create({
+      data: {
+        email,
+        name,
+        password: passwordHash,
+      },
     });
 
-    delete user.password;
+    const studentDTO = student as StudentDTO;
+    delete studentDTO.password;
 
-    return user;
+    return studentDTO;
   }
 
-  public async update(id: number, data: IRequest): Promise<Student | AppError | null> {
+  public async update(id: number, data: IRequest) {
     data = super.removeMask(data) as IRequest;
+
     let {
-      name,
       email,
+      name,
       password,
     } = data;
 
     await StudentRequest.update({
       id,
-      name,
       email,
+      name,
       password,
     });
 
     const passwordHash = await hash(password, 8);
 
-    let user = await this.repository.update(id, {
-      name,
-      email,
-      password: passwordHash,
+    const student = await this.client.update({
+      data: {
+        email,
+        name,
+        password: passwordHash,
+      },
+      where: { id },
     });
 
-    if (!user) {
-      return null;
-    }
+    const studentDTO = student as StudentDTO;
+    delete studentDTO.password;
 
-    delete user.password;
-
-    return user;
+    return studentDTO;
   }
 
-  public async delete(id: number | number[] | object): Promise<any> {
-    const deleted = await this.repository.delete(id);
-    return deleted.affected;
+  public async delete(id: number) {
+    await StudentRequest.delete({ id });
+
+    const deleted = await this.client.delete({ where: { id } });
+
+    return deleted;
   }
 
-  public async findOneFullData(id: number, data: object = {}): Promise<Student | undefined> {
-    await StudentRequest.findOneFullData({ id });
+  public async findOneFullData(id: number, data: object = {}) {
+    const student = await this.client.findFirst({ where: { id }, ...data });
 
-    return this.repository.findOneFullData(id, data);
+    return student;
   }
 
 }

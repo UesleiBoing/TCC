@@ -5,9 +5,8 @@ import AppError from '@shared/errors/AppError';
 import ErrorMessages from '@shared/errors/ErrorMessages';
 import CommunicationHelper from '@shared/helpers/CommunicationHelper';
 import TokenHelper from '@shared/helpers/TokenHelper';
+import client from '@shared/infra/prisma/client';
 
-import Student from '@modules/users/infra/typeorm/entities/Student';
-import Teacher from '@modules/users/infra/typeorm/entities/Teacher';
 import StudentsService from '@modules/users/services/StudentsService';
 import TeachersService from '@modules/users/services/TeachersService';
 
@@ -36,15 +35,17 @@ export default async function ensureAuthenticationStudentsTeachers(
   try {
     const userToken = TokenHelper.getSubject(String(TokenHelper.getToken(request)));
 
-    let usersService: StudentsService | TeachersService | undefined;
-
+    let user;
     if (userToken.isTeacher) {
-      usersService = container.resolve(TeachersService);
+      user = await client.teacher.findFirst({
+        where: { id: userToken.id },
+      });
     } else {
-      usersService = container.resolve(StudentsService);
+      user = await client.student.findFirst({
+        where: { id: userToken.id },
+      });
     }
 
-    const user: Student | Teacher | undefined = await usersService.findOne(userToken.id);
     if (!user) {
       return response.status(401).json(
         CommunicationHelper.error(

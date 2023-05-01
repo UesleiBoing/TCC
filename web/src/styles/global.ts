@@ -11,7 +11,7 @@ export default createGlobalStyle`
   }
   
   body {
-    background: #F0F0F5;
+    background: #F0F0F5 !important; 
     -webkit-font-smoothing: antialiased;
     color: var(--text-color);
   }
@@ -27,6 +27,38 @@ export default createGlobalStyle`
 
   button {
     cursor: pointer;
+  }
+
+  fieldset.field-data {
+    margin-top: 64px; 
+    min-inline-size: auto;
+    border: 0;
+    padding: 20px;
+    
+    legend.legend-fielddata {
+      width: 100%;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+      
+      @media screen and (max-width: 600px) {
+        display: block;
+      }
+
+      h2 {
+        font-size: 24px;
+
+        svg {
+          vertical-align: top;
+        }
+      }
+
+      span {
+        font-size: 14px;
+        font-weight: normal;
+      }
+    }
   }
   
   :root {

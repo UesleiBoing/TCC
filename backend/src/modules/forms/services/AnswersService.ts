@@ -1,91 +1,123 @@
-import { hash } from 'bcryptjs';
-import { container, inject, injectable } from 'tsyringe';
+import { Answer } from '@prisma/client';
+import { injectable } from 'tsyringe';
 
 import Service from '@shared/core/Service';
-import AppError from '@shared/errors/AppError';
+import client from '@shared/infra/prisma/client';
 
 import AnswerRequest from '../infra/http/requests/AnswerRequest';
-import Answer from '../infra/typeorm/entities/Answer';
-import IAnswersRepository from '../repositories/IAnswersRepository';
 
 interface IRequest {
   description: string;
-  photo: string | null;
+  order?: number;
+  photo?: string;
+  value?: number;
   question_id: number;
 }
 
 @injectable()
 export default class AnswersService extends Service {
 
-  constructor(
-    @inject('AnswersRepository')
-    protected repository: IAnswersRepository,
-  ) {
-    super();
+  client = client.answer;
+
+  public async findById(id: number) {
+    const answer = await this.client.findFirst({
+      where: { id },
+    });
+
+    return answer;
   }
 
-  public entity = Answer;
+  public async findAll(data: object = {}) {
+    const answers = await super.findAll(data);
+
+    return answers;
+  }
 
   public async create(data: IRequest): Promise<Answer> {
     data = super.removeMask(data) as IRequest;
+
     let {
       description,
       photo,
       question_id,
+      order,
+      value,
     } = data;
 
     await AnswerRequest.create({
       description,
       photo,
       question_id,
+      value,
+      order,
     });
 
-    let object = await this.repository.create({
-      description,
-      photo,
-      question_id,
+    order = await this.getOrderHandled({ order });
+
+    const answer = await this.client.create({
+      data: {
+        description,
+        photo,
+        question_id,
+        value,
+        order,
+      },
     });
 
-    return object;
+    return answer;
   }
 
-  public async update(id: number, data: IRequest): Promise<Answer | AppError | null> {
+  public async update(id: number, data: IRequest): Promise<Answer> {
     data = super.removeMask(data) as IRequest;
+
     let {
       description,
       photo,
       question_id,
+      value,
+      order,
     } = data;
 
     await AnswerRequest.update({
       id,
       description,
       photo,
+      value,
       question_id,
+      order,
     });
 
-    let object = await this.repository.update(id, {
-      description,
-      photo,
-      question_id,
+    order = await this.getOrderHandled({ id, order });
+
+    const answer = await this.client.update({
+      data: {
+        description,
+        photo,
+        value,
+        question_id,
+        order,
+      },
+      where: { id },
     });
 
-    if (!object) {
-      return null;
-    }
-
-    return object;
+    return answer;
   }
 
-  public async delete(id: number | number[] | object): Promise<any> {
-    const deleted = await this.repository.delete(id);
-    return deleted.affected;
+  public async delete(id: number) {
+    await AnswerRequest.delete({ id });
+
+    const deleted = await this.client.delete({ where: { id } });
+
+    return deleted;
   }
 
-  public async findOneFullData(id: number, data: object = {}): Promise<Answer | undefined> {
-    await AnswerRequest.findOneFullData({ id });
+  public async findOneFullData(id: number, data: object = {}) {
+    const answer = await this.client.findFirst({
+      where: { id },
+      ...data,
+    });
 
-    return this.repository.findOneFullData(id, data);
+    return answer;
   }
 
 }

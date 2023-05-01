@@ -1,4 +1,4 @@
-export default interface IStudentDTO {
+export default interface StudentDTO {
   id?: number;
   name: string;
   email: string;

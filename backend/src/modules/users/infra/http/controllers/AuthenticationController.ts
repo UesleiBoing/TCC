@@ -9,7 +9,7 @@ export default class AuthenticationController extends Controller {
 
   public async login(req: Request, res: Response): Promise<Response> {
     const service = container.resolve(AuthenticationService);
-    const result = await service.login(req.body, !!req.query.point);
+    const result = await service.login(req.body, !!req.query.isTeacher);
 
     return res.status(200).json(result);
   }
