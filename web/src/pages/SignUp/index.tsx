@@ -98,7 +98,7 @@ const SignUp: React.FC = () => {
             <SwitchBox>
               <Switch value={isTeacher} onChange={() => setIsTeacher(!isTeacher)}/> 
               <Typography variant="body1" >
-                Professor
+                {isTeacher ? 'Professor' : 'Aluno'}
               </Typography>
             </SwitchBox>
 

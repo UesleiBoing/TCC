@@ -4,7 +4,7 @@ import { Button, ButtonBase } from "@mui/material";
 import { Form } from "@unform/web";
 import { AiOutlineOrderedList } from "react-icons/ai";
 import { GiClassicalKnowledge } from "react-icons/gi";
-import { HiTemplate } from "react-icons/hi";
+import { HiOutlineExclamationCircle, HiTemplate } from "react-icons/hi";
 import { MdOutlineDescription } from "react-icons/md";
 import { Link, useNavigate, useParams } from "react-router-dom";
 
@@ -18,6 +18,7 @@ import handleAxiosError from "hooks/handleAxiosError";
 import Toast from "hooks/toast/Toast";
 
 import FormDTO from "interfaces/entities/Form";
+import FormQuestion from "interfaces/entities/FormQuestion";
 import Keyword from "interfaces/entities/Keyword";
 import Question from "interfaces/entities/Question";
 import Student from "interfaces/entities/Student";
@@ -42,6 +43,7 @@ const StandardForms: React.FC = () => {
 	const { topic: topic_id } = useParams();
 	
 	const [topic, setTopic] = useState<Topic>();
+	const [formBackend, setFormBackend] = useState<FormDTO>({} as FormDTO);
 	const [questions, setQuestions] = useState<Question[]>([]);
 	const [selectedQuestions, setSelectedQuestions] = useState<number[]>([]);
 
@@ -76,10 +78,14 @@ const StandardForms: React.FC = () => {
 	const handleResponse = useCallback(async (data: any) => {
 		const toast = new Toast().loading();
 
-		try {
-			await api.post("/forms/generate", data);
-			form.clear();
+		try {	
+			await api.put(`/topics/${topic_id}/standard-form`, data);
 
+			setFormBackend((prevState) => ({
+				...prevState,
+				active: true
+			}))
+			
 			toast.success("Dados enviados com sucesso");
 		} catch (error: any) {
 			const { message } = handleAxiosError(error);
@@ -94,9 +100,14 @@ const StandardForms: React.FC = () => {
 				...dataForm,
 				topic_id: Number(topic_id),
 				questions: selectedQuestions,
+				active: selectedQuestions.length > 0,
 			};
 
 			await form.validation(data);
+
+			if (data.questions.length === 0) {
+				return new Toast().error('Selecione pelo menos uma questão');
+			}
 
 			handleResponse(data);
 		},
@@ -117,16 +128,36 @@ const StandardForms: React.FC = () => {
 	useEffect(() => {
 		Promise.all([
 			api.get(`/topics/${topic_id}/questions`).then(({ data }) => {
-        setQuestions(data);
+				const questions = data as Question[];
+        setQuestions(questions);
       }),
 			api.get(`/topics/${topic_id}`).then(({ data }) => {
 				if (!data) {
 					return navigate('/topics');
 				}
 				setTopic(data);
+				setFormBackend(data.forms[0]);
 			}),
 		]);
 	}, []);
+
+	
+	useEffect(() => {
+		if (!formBackend) {
+			return;
+		}
+		api.get(`forms/${formBackend?.id}?questions=true`).then(({ data }) => {
+			const { title, description, formQuestions } = data as FormDTO;
+
+			form.setData({ title, description });
+
+			if (formBackend.active) {				
+				setSelectedQuestions(formQuestions.map((formQuestion) => formQuestion.question_id));
+			} else {
+				setSelectedQuestions(questions.map(question => question.id));
+			} 
+		});
+	}, [formBackend]);
 
 	return (
 		<MainDefault>
@@ -135,7 +166,7 @@ const StandardForms: React.FC = () => {
 					<legend className='legend-fielddata'>
 						<Title variant='h5'>
 							<HiTemplate className='icon-legend' />
-							Dados
+							Formulário {formBackend?.active ? 'Ativo' : 'Inativo'}!
 						</Title>
 					</legend>
 					<FormBuilder fields={form.fields} />
@@ -143,7 +174,7 @@ const StandardForms: React.FC = () => {
 					<QuestionsSection>
 						{
 							questions.map(question => (
-								<QuestionCard
+								<QuestionCard key={question.id}
 									isSelected={selectedQuestions.includes(question.id)}
 									onClick={() => handleClickQuestion(question.id)}
 								>
@@ -151,11 +182,32 @@ const StandardForms: React.FC = () => {
 								</QuestionCard>
 							))
 						}
+						{
+							questions.length === 0 && (
+								<Title variant='h5' sx={{
+									textAlign: 'center',
+								}}>
+									<HiOutlineExclamationCircle className='icon-legend' />
+									Nenhuma questão cadastrada!
+								</Title>
+							)
+						}
 					</QuestionsSection>
 					<ButtonGroup>
-						<Button type='submit' variant='contained'>
-							Gerar
-						</Button>
+						{
+							questions.length > 0 ? (
+								<Button type='submit' variant='contained'>
+									Gerar
+								</Button>
+							): (
+								<Button component={Link}
+									to={`/topics/${topic?.id}/questions`}
+									variant="contained"
+								>
+									Adicionar Questões
+								</Button>
+							)
+						}
 						<Button
 							type='submit'
 							component={Link}

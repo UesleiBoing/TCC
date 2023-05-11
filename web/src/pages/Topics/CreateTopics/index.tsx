@@ -81,6 +81,7 @@ const CreateTopics: React.FC = () => {
 			class_id: Number(data.class_id),
 			order: Number(data.order),
 		};
+		
 		try {
 			if (!topic_id) {
 				await api.post("/topics", data);
@@ -90,6 +91,10 @@ const CreateTopics: React.FC = () => {
 			}
 
 			toast.success("Dados enviados com sucesso");
+
+			if (topic_id) {				
+				navigate("/topics");
+			}
 		} catch (error: any) {
 			const { message } = handleAxiosError(error);
 			toast.error(`Ops... ${message}`);

@@ -17,7 +17,16 @@ export default class TopicsService extends Service {
   client = client.topic;
 
   public async findById(id: number) {
-    const topic = await this.client.findFirst({ where: { id } });
+    const topic = await this.client.findFirst({
+      where: { id },
+      include: {
+        forms: {
+          where: {
+            standard: true,
+          },
+        },
+      },
+    });
 
     return topic;
   }
@@ -44,7 +53,7 @@ export default class TopicsService extends Service {
       where: {
         classes: {
           classes_students: {
-            every: {
+            some: {
               student_id,
             },
           },
@@ -90,6 +99,15 @@ export default class TopicsService extends Service {
         description,
         order,
         class_id: Number(class_id),
+        forms: {
+          create: {
+            title: `Formulário de ${description}`,
+            description: `Formulário referente ao tópico de ${description}`,
+            order: 0,
+            standard: true,
+            active: false,
+          },
+        },
       },
     });
 

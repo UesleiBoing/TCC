@@ -36,7 +36,7 @@ export const QuestionCard = styled.div<QuestionCardProps>`
   justify-content: center;
   align-items: center;
 
-  ${props => props.isSelected && css`
+  ${props => !props.isSelected && css`
     border: 1px solid red;
     box-shadow: 0px 0px 1px 1px rgba(255,0,0,.5);
   `}

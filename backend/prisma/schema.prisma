@@ -8,8 +8,8 @@ datasource db {
 }
 
 model Answer {
-  id          Int     @id() @default(autoincrement())
-  description String  @db.VarChar(400)
+  id          Int    @id() @default(autoincrement())
+  description String @db.VarChar(1000)
   order       Int?
   value       Int?
 
@@ -25,7 +25,7 @@ model Answer {
 
 model StudentAnswers {
   id          Int    @id() @default(autoincrement())
-  description String @db.VarChar(400)
+  description String? @db.VarChar(400)
 
   question_id Int
   test_id     Int
@@ -56,6 +56,7 @@ model Class {
 
   classes_students ClassStudent[]
   topics           Topic[]
+
   @@unique([title, year, semester, teacher_id, subject_id], name: "classUnique")
   @@map("classes")
 }
@@ -66,7 +67,7 @@ model ClassStudent {
   student_id Int
 
   classe  Class   @relation(fields: [class_id], references: [id], onDelete: Cascade)
-  student Student @relation(fields: [student_id], references: [id], onDelete: Cascade) 
+  student Student @relation(fields: [student_id], references: [id], onDelete: Cascade)
 
   @@index([class_id])
   @@index([student_id])
@@ -78,22 +79,25 @@ model Form {
   title       String  @db.VarChar(80)
   description String? @db.VarChar(300)
 
+  standard    Boolean @default(false)
+  active      Boolean @default(true)
+  
   order    Int
   topic_id Int
 
   created_at DateTime @default(now()) @db.Timestamp(6)
   updated_at DateTime @default(now()) @db.Timestamp(6)
 
-  topic     Topic?     @relation(fields: [topic_id], references: [id])
+  topic         Topic?         @relation(fields: [topic_id], references: [id])
   formQuestions FormQuestion[]
-  tests     Test[]
+  tests         Test[]
 
   @@map("forms")
 }
 
 model FormQuestion {
-  id         Int @id() @default(autoincrement())
-  form_id    Int
+  id          Int @id() @default(autoincrement())
+  form_id     Int
   question_id Int
 
   form     Form     @relation(fields: [form_id], references: [id], onDelete: Cascade)
@@ -103,22 +107,22 @@ model FormQuestion {
   @@index([question_id])
   @@map("forms_questions")
 }
+
 model Question {
   id             Int     @id() @default(autoincrement())
-  description    String  @db.VarChar(300)
+  description    String  @db.VarChar(1000)
   type           Int     @default(0)
-  weight         Decimal @default(1) @db.Decimal(3, 2)
+  weight         Decimal @default(1) @db.Decimal(4, 2)
   correct_answer String? @db.VarChar
   order          Int?
 
   created_at DateTime @default(now()) @db.Timestamp(6)
   updated_at DateTime @default(now()) @db.Timestamp(6)
 
-  answers        Answer[]
-  forms          FormQuestion[]            @relation()
-  StudentAnswers StudentAnswers[]
+  answers          Answer[]
+  forms            FormQuestion[]    @relation()
+  StudentAnswers   StudentAnswers[]
   keywordQuestions KeywordQuestion[]
-
 
   @@map("questions")
 }
@@ -139,8 +143,8 @@ model Student {
 }
 
 model KeywordQuestion {
-  id         Int @id() @default(autoincrement())
-  keyword_id    Int
+  id          Int @id() @default(autoincrement())
+  keyword_id  Int
   question_id Int
 
   keyword  Keyword  @relation(fields: [keyword_id], references: [id], onDelete: Cascade)
@@ -152,14 +156,14 @@ model KeywordQuestion {
 }
 
 model Keyword {
-  id      Int    @id() @default(autoincrement())
-  description   String @db.VarChar(40)
-  topic_id Int
+  id          Int    @id() @default(autoincrement())
+  description String @db.VarChar(40)
+  topic_id    Int
 
   created_at DateTime @default(now()) @db.Timestamp(6)
   updated_at DateTime @default(now()) @db.Timestamp(6)
 
-  topic Topic? @relation(fields: [topic_id], references: [id])
+  topic            Topic?            @relation(fields: [topic_id], references: [id])
   keywordQuestions KeywordQuestion[]
 
   @@unique([description, topic_id], name: "keywordUnique")
@@ -195,7 +199,8 @@ model Teacher {
 
 model Test {
   id         Int      @id() @default(autoincrement())
-  grade      Decimal? @db.Decimal(4, 2)
+  grade      Decimal? @db.Decimal(6, 2)
+  grade_ten  Decimal? @db.Decimal(3, 2)
   form_id    Int
   student_id Int
 
@@ -218,8 +223,8 @@ model Topic {
   created_at DateTime @default(now()) @db.Timestamp(6)
   updated_at DateTime @default(now()) @db.Timestamp(6)
 
-  forms   Form[]
-  classes Class? @relation(fields: [class_id], references: [id])
+  forms    Form[]
+  classes  Class?    @relation(fields: [class_id], references: [id])
   keywords Keyword[]
 
   @@map("topics")

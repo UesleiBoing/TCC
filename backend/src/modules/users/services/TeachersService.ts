@@ -1,18 +1,21 @@
 import { Teacher } from '@prisma/client';
-import { hash } from 'bcryptjs';
+import { compare, hash } from 'bcryptjs';
 import { inject, injectable } from 'tsyringe';
 
 import Service from '@shared/core/Service';
+import AppError from '@shared/errors/AppError';
 import client from '@shared/infra/prisma/client';
 
 import TeacherDTO from '../dtos/ITeacherDTO';
 import TeacherRequest from '../infra/http/requests/TeacherRequest';
+import TeacherUpdateNoPasswordRequest from '../infra/http/requests/TeacherUpdateNoPasswordRequest';
 
 interface IRequest {
   id?: number;
   email: string;
   name: string;
   password: string;
+  actual_password?: string;
 }
 
 @injectable()
@@ -70,22 +73,50 @@ export default class TeachersService extends Service {
       email,
       name,
       password,
+      actual_password,
     } = data;
 
-    await TeacherRequest.update({
-      id,
-      email,
-      name,
-      password,
-    });
+    if (!password) {
+      await TeacherUpdateNoPasswordRequest.update({
+        id,
+        email,
+        name,
+        actual_password,
+      });
+    } else {
+      await TeacherRequest.update({
+        id,
+        email,
+        name,
+        password,
+        actual_password,
+      });
+    }
 
-    const passwordHash = await hash(password, 8);
+    const teacherToCompare = await this.client.findFirst({ where: { id } });
+
+    if (!teacherToCompare) {
+      throw new AppError('Professor não encontrado');
+    }
+
+    const passwordMatched = await compare(
+      String(actual_password),
+      teacherToCompare.password,
+    );
+
+    if (!passwordMatched) {
+      throw new AppError('Senha atual incorreta');
+    }
+
+    if (password) {
+      password = await hash(password, 8);
+    }
 
     const teacher = await this.client.update({
       data: {
         email,
         name,
-        password: passwordHash,
+        password,
       },
       where: { id },
     });

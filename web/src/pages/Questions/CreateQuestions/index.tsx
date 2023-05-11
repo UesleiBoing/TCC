@@ -123,6 +123,7 @@ const CreateQuestions: React.FC = () => {
 				name: "weight",
 				label: "Peso",
 				placeholder: "Peso",
+				maxLength: 99,
 				icon: FaWeightHanging,
 			},
 			{
@@ -147,12 +148,42 @@ const CreateQuestions: React.FC = () => {
 				await api.post("/questions", data);
 				form.clear();
 				setCorrectAnswer(undefined);
-				setAnswers(initializedAnswers)
+				setAnswers([
+					{
+						description: "",
+						value: "1",
+						visible: true,
+					},
+					{
+						description: "",
+						value: "2",
+						visible: true,
+					},
+					{
+						description: "",
+						value: "3",
+						visible: true,
+					},
+					{
+						description: "",
+						value: "4",
+						visible: true,
+					},
+					{
+						description: "",
+						value: "5",
+						visible: true,
+					},
+				])
 			} else {
 				await api.put(`/questions/${question_id}`, data);
 			}
 
 			toast.success("Dados enviados com sucesso");
+
+			if (question_id) {
+				return navigate(`/topics/${topic_id}/questions`);
+			}
 		} catch (error: any) {
 			const { message } = handleAxiosError(error);
 			toast.error(`Ops... ${message}`);
@@ -368,7 +399,7 @@ const CreateQuestions: React.FC = () => {
 						<Button
 							type='submit'
 							component={Link}
-							to='/questions'
+							to={`/topics/${topic_id}/questions`}
 							variant='contained'
 							color='error'>
 							Voltar

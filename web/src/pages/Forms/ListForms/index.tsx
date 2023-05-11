@@ -62,13 +62,7 @@ const ListTopicsForms: React.FC = () => {
       <DataTable
         title="Tópicos"
         data={topics}
-        metadata={[
-          {
-            prop: 'id',
-            label: 'Código',
-            primaryKey: true,
-            numeric: true
-          }, 
+        metadata={[ 
           {
             prop: 'description',
             label: 'Descrição'
@@ -78,16 +72,19 @@ const ListTopicsForms: React.FC = () => {
             label: 'Classe'
           },
         ]}
-        haveActions={user.isTeacher}
         actions={({ id }) => (
           <>
-            <Button component={Link}
-              to={`/topics/${id}/standard-form`}
-              variant="contained"
-              color='info'
-            >
-              Formulário Padrão
-            </Button>
+          
+            { 
+              user.isTeacher && 
+                <Button component={Link}
+                  to={`/topics/${id}/standard-form`}
+                  variant="contained"
+                  color='info'
+                >
+                  Formulário Padrão
+                </Button>
+            }
             
             <Button component={Link}
               to={`/topics/${id}/generate-form`}

@@ -149,6 +149,10 @@ const CreateClasses: React.FC = () => {
 			}
 
 			toast.success("Dados enviados com sucesso");
+
+			if (class_id) {
+				navigate("/classes");
+			}
 		} catch (error: any) {
 			const { message } = handleAxiosError(error);
 			toast.error(`Ops... ${message}`);

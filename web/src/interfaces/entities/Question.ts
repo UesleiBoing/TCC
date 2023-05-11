@@ -1,3 +1,4 @@
+import Answer from "./Answer";
 import Form from "./Form";
 
 export default interface Question {
@@ -8,4 +9,6 @@ export default interface Question {
 
 	correct_answer?: string;
 	order: number;
+
+	answers?: Answer[];
 }

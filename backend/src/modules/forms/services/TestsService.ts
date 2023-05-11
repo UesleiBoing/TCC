@@ -7,6 +7,7 @@ import Service from '@shared/core/Service';
 import client from '@shared/infra/prisma/client';
 
 import TYPE_QUESTION from '../enums/TypeQuestion';
+import TestRequest from '../infra/http/requests/TestRequest';
 
 import QuestionsService from './QuestionsService';
 
@@ -53,6 +54,10 @@ export default class TestsService extends Service {
     }
     question: Question
   }) {
+    if (!answer.description) {
+      return 0;
+    }
+
     const awnserArray = answer.description.split(', ');
 
     if (!question.correct_answer) {
@@ -125,6 +130,8 @@ export default class TestsService extends Service {
 
     const { form_id, student_id, answers } = data;
 
+    await TestRequest.create({ form_id, student_id, answers });
+
     let test = await this.client.create({
       data: {
         form_id,
@@ -136,7 +143,7 @@ export default class TestsService extends Service {
             }
 
             return {
-              description: description.toString(),
+              description: description ? description.toString() : undefined,
               question_id,
             };
           }),
@@ -161,6 +168,7 @@ export default class TestsService extends Service {
     const testUpdated = await this.client.update({
       data: {
         grade,
+        grade_ten: grade / possibleOfCorrectGrade,
       },
       where: { id: test.id },
     });

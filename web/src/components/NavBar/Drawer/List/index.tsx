@@ -3,7 +3,7 @@ import React, { Fragment } from 'react';
 import { Divider, ListItem, ListItemButton, ListItemIcon, ListItemText } from '@mui/material';
 import { List as ListMUI } from '@mui/material';
 
-import { sidebarData } from 'components/NavBar/sidebarData';
+import { sidebarDataStudent, sidebarDataTeacher } from 'components/NavBar/sidebarData';
 
 import { useAuth } from 'hooks/auth';
 import { useSettings } from 'hooks/settings';
@@ -22,7 +22,7 @@ interface IItem {
 }
 
 const List: React.FC<IProps> = ({ open, handleDrawerClose }) => {
-  const { signOut } = useAuth();
+  const { signOut, isTeacher } = useAuth();
 
   async function handleClick(item: IItem) {
     if (item.title === 'Logout') {
@@ -32,7 +32,7 @@ const List: React.FC<IProps> = ({ open, handleDrawerClose }) => {
   
   return (
     <>
-      {sidebarData.map((group, i) => (
+      {(isTeacher() ? sidebarDataTeacher : sidebarDataStudent).map((group, i) => (
         <Fragment key={i}>
           <Divider />
           <ListMUI>

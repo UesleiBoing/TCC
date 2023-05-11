@@ -84,6 +84,11 @@ const CreateSubjects: React.FC = () => {
 			}
 
 			toast.success("Dados enviados com sucesso");
+			
+			if (subject_id) {
+				return navigate(`/subjects`);
+			}
+
 		} catch (error: any) {
 			const { message } = handleAxiosError(error);
 			toast.error(`Ops... ${message}`);

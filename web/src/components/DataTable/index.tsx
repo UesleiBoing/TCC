@@ -174,7 +174,6 @@ const DataTable: React.FC<DataTableProps> = ({
 				
 				<TableContainer className="decent-horizontal-scrollbar-datatable">
 					<Table 
-						sx={{ minWidth: 750 }}
 						aria-labelledby='tableTitle'
 						size={dense ? "small" : "medium"}>
 						<EnhancedTableHead

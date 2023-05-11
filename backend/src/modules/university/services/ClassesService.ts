@@ -1,4 +1,4 @@
-import { Class } from '@prisma/client';
+import { Class, Student } from '@prisma/client';
 import { injectable } from 'tsyringe';
 
 import Service from '@shared/core/Service';
@@ -15,6 +15,17 @@ interface IRequest {
   teacher_id: number;
   subject_id: number;
   students: number[];
+}
+
+interface StudentWithGrade {
+  id: number;
+  name: string;
+  sum_grade: number;
+}
+interface StudentRankQueryResult {
+  form_id: number;
+  student_id: number;
+  grade: string;
 }
 
 @injectable()
@@ -66,7 +77,7 @@ export default class ClassesService extends Service {
       },
       where: {
         classes_students: {
-          every: {
+          some: {
             student_id,
           },
         },
@@ -99,6 +110,56 @@ export default class ClassesService extends Service {
         },
       },
     };
+  }
+
+  public async rankStudentsByGrade(class_id: number) {
+    const gradeByStudent = await client.$queryRaw`
+     SELECT tests.form_id, 
+            tests.student_id, 
+            ROUND(MAX(tests.grade_ten * tests.grade), 2) AS "grade"
+       FROM tests
+       JOIN forms ON
+            forms.id = tests.form_id
+       JOIN topics ON 
+            forms.topic_id = topics.id
+       JOIN students ON 
+            students.id = tests.student_id
+       JOIN classes_studentes ON 
+            students.id = classes_studentes.student_id
+      WHERE classes_studentes.class_id = ${class_id}
+        AND topics.class_id = ${class_id}
+      GROUP BY tests.form_id, tests.student_id
+   ` as StudentRankQueryResult[];
+
+    const student_ids = [...new Set(gradeByStudent.map((student) => student.student_id))];
+
+    const students = await client.student.findMany({
+      select: {
+        id: true,
+        name: true,
+      },
+      where: {
+        id: {
+          in: student_ids,
+        },
+      },
+    });
+
+    const studentsWithGrade: StudentWithGrade[] = students.map((student) => ({
+      ...student,
+      sum_grade: 0,
+    }));
+
+    gradeByStudent.forEach((testResult) => {
+      const studentIndex = studentsWithGrade.findIndex(
+        (student) => student.id === testResult.student_id,
+      );
+
+      const gradeToAdd = parseFloat(testResult.grade);
+      studentsWithGrade[studentIndex].sum_grade += gradeToAdd;
+    });
+
+    return studentsWithGrade;
   }
 
   public async create(data: IRequest): Promise<Class> {

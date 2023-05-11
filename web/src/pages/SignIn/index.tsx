@@ -41,9 +41,7 @@ const SignIn: React.FC = () => {
       const toast = new Toast().loading();
 
       try {
-        // await signIn({ isTeacher, ...data });
-        await signIn({ isTeacher: true, email: "teste@gmail.com",
-        password: "12345678" });
+        await signIn({ isTeacher, ...data });
         
         navigate('/dashboard');
         
@@ -55,13 +53,6 @@ const SignIn: React.FC = () => {
     },
     [navigate, signIn, isTeacher],
   );
-
-  useEffect(() => {
-    form.setData({
-      email: "teste@gmail.com",
-	    password: "Teste$@4aaa@123"
-    });
-  }, [form]);
 
   return (
     <Container>
@@ -95,7 +86,7 @@ const SignIn: React.FC = () => {
             <SwitchBox>
               <Switch checked={isTeacher} onChange={() => setIsTeacher(!isTeacher)}/> 
               <Typography variant="body1" >
-                Professor
+                {isTeacher ? 'Professor' : 'Aluno'}
               </Typography>
             </SwitchBox>
 

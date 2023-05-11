@@ -14,6 +14,7 @@ topicsRouter.get('/of-student/:student_id', ensureAuthenticationStudentsTeachers
 topicsRouter.get('/:id/keywords', ensureAuthenticationStudentsTeachers, topicsController.findKeywords);
 topicsRouter.get('/:id/questions', ensureAuthenticationStudentsTeachers, topicsController.findQuestions);
 topicsRouter.post('/', ensureAuthenticationTeachers, topicsController.create);
+topicsRouter.put('/:id/standard-form', ensureAuthenticationTeachers, topicsController.updateStandardForm);
 topicsRouter.put('/:id', ensureAuthenticationTeachers, topicsController.update);
 topicsRouter.patch('/:id', ensureAuthenticationTeachers, topicsController.update);
 topicsRouter.delete('/:id', ensureAuthenticationTeachers, topicsController.delete);

@@ -3,5 +3,5 @@ export default interface Metadata {
   label: string;
   numeric?: boolean;
   primaryKey?: boolean;
-  mask?: (value: any) => string;
+  mask?: (value: any) => JSX.Element|string;
 }

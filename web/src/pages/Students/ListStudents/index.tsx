@@ -37,13 +37,7 @@ const ListStudents: React.FC = () => {
       <DataTable
         title="Estudantes"
         data={students}
-        metadata={[
-          {
-            prop: 'id',
-            label: 'Código',
-            primaryKey: true,
-            numeric: true
-          }, 
+        metadata={[ 
           {
             prop: 'name',
             label: 'Nome'

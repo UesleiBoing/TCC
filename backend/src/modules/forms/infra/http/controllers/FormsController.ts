@@ -2,6 +2,7 @@ import { Request, Response } from 'express';
 import { container } from 'tsyringe';
 
 import Controller from '@shared/core/Controller';
+import TokenHelper from '@shared/helpers/TokenHelper';
 
 import FormsService from '@modules/forms/services/FormsService';
 
@@ -32,6 +33,17 @@ export default class FormsController extends Controller {
       questions: req.query.questions as string | undefined,
       answers: req.query.answers as string | undefined,
     });
+
+    return res.status(200).json(result);
+  }
+
+  public async findFormsOfStudent(req: Request, res: Response): Promise<Response> {
+
+    const { id } = TokenHelper.getSubject(req);
+
+    const service = container.resolve(FormsService);
+
+    const result = await service.findFormsOfStudent(id);
 
     return res.status(200).json(result);
   }

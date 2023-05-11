@@ -2,7 +2,7 @@ import styled from 'styled-components';
 
 export const MainDefault = styled.section`
   box-sizing: border-box;
-  min-height: calc(100vh - 120px);
+  min-height: calc(100vh - 70px);
   padding: 20px;
   margin: 22px;
   background: #FFF;

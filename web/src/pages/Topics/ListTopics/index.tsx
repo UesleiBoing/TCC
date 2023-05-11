@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from 'react';
 
 import { Button, ButtonBase } from '@mui/material';
+import { FaTrash } from 'react-icons/fa';
+import { FiEdit } from 'react-icons/fi';
 import { Link } from 'react-router-dom';
 
 import DataTable from 'components/DataTable';
@@ -72,13 +74,7 @@ const ListTopics: React.FC = () => {
       <DataTable
         title="Tópicos"
         data={topics}
-        metadata={[
-          {
-            prop: 'id',
-            label: 'Código',
-            primaryKey: true,
-            numeric: true
-          }, 
+        metadata={[ 
           {
             prop: 'description',
             label: 'Descrição'
@@ -114,14 +110,14 @@ const ListTopics: React.FC = () => {
                   to={`/topics/${id}`}
                   variant="contained"
                   color='secondary'>
-                  Editar
+                  <FiEdit />
                 </Button>
 
                 <Button onClick={(e) => handleDeleteTopic(e, id)}
                   type='button'
                   variant="contained"
                   color='error'>
-                  Remover
+                  <FaTrash />	
                 </Button>
               </>
             }

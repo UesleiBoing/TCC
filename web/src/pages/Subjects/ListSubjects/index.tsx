@@ -1,6 +1,9 @@
 import React, { useEffect, useState } from 'react';
 
 import { Button } from '@mui/material';
+import { AiOutlineDelete } from 'react-icons/ai';
+import { FaTrash } from 'react-icons/fa';
+import { FiEdit } from 'react-icons/fi';
 import { Link } from 'react-router-dom';
 
 import DataTable from 'components/DataTable';
@@ -9,6 +12,7 @@ import { useAuth } from 'hooks/auth';
 import Toast from 'hooks/toast/Toast';
 
 import Classe from 'interfaces/entities/Classe';
+import Subject from 'interfaces/entities/Subject';
 
 import api from 'services/api';
 
@@ -19,7 +23,7 @@ import { ButtonGroup } from './style';
 
 const ListSubjects: React.FC = () => {
 
-  const [subjects, setSubjects] = useState<Classe[]>([]);
+  const [subjects, setSubjects] = useState<Subject[]>([]);
   const { user } = useAuth();
   
   const handleDeleteClasse = (e: React.MouseEvent, id:number) => {
@@ -71,12 +75,6 @@ const ListSubjects: React.FC = () => {
         data={subjects}
         metadata={[
           {
-            prop: 'id',
-            label: 'Código',
-            primaryKey: true,
-            numeric: true
-          }, 
-          {
             prop: 'title',
             label: 'Título'
           },
@@ -92,14 +90,14 @@ const ListSubjects: React.FC = () => {
               to={`/subjects/${id}`}
               variant="contained"
               color='secondary'>
-              Editar
+              <FiEdit />
             </Button>
 
             <Button onClick={(e) => handleDeleteClasse(e, id)}
               type='button'
               variant="contained"
               color='error'>
-              Remover
+              <FaTrash />
             </Button>
           </>
         )}

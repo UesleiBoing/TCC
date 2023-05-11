@@ -2,6 +2,8 @@ import React, { useEffect, useState } from 'react';
 
 import { Button, ButtonBase } from '@mui/material';
 import { Form } from '@unform/web';
+import { FaTrash } from 'react-icons/fa';
+import { FiEdit } from 'react-icons/fi';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 
 import DataTable from 'components/DataTable';
@@ -79,13 +81,7 @@ const ListKeywords: React.FC = () => {
       <DataTable
         title="Palavras-chave"
         data={keywords}
-        metadata={[
-          {
-            prop: 'id',
-            label: 'Código',
-            primaryKey: true,
-            numeric: true
-          }, 
+        metadata={[ 
           {
             prop: 'description',
             label: 'Descrição'
@@ -97,14 +93,14 @@ const ListKeywords: React.FC = () => {
               to={`/topics/${topic_id}/keywords/${id}`}
               variant="contained"
               color='secondary'>
-              Editar
+              <FiEdit />
             </Button>
 
             <Button onClick={(e) => handleDeleteKeyword(e, id)}
               type='button'
               variant="contained"
               color='error'>
-              Remover
+              <FaTrash />	
             </Button>
           </>
         )}

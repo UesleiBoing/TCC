@@ -86,6 +86,6 @@ export const Background = styled.div`
 export const SwitchBox = styled.div`
   display: flex;
   align-items: center;
-  justify-content: end;
+  justify-content: start;
 `;
 

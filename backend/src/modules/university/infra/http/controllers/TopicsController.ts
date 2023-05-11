@@ -2,7 +2,9 @@ import { Request, Response } from 'express';
 import { container } from 'tsyringe';
 
 import Controller from '@shared/core/Controller';
+import AppError from '@shared/errors/AppError';
 
+import FormsService from '@modules/forms/services/FormsService';
 import QuestionsService from '@modules/forms/services/QuestionsService';
 import TopicsService from '@modules/university/services/TopicsService';
 
@@ -28,7 +30,7 @@ export default class TopicsController extends Controller {
     const id = super.getIdParam(req);
 
     const service = container.resolve(TopicsService);
-    const result = await service.findOneFullData(id);
+    const result = await service.findById(id);
 
     return res.status(200).json(result);
   }
@@ -69,6 +71,30 @@ export default class TopicsController extends Controller {
     const result = await service.update(id, req.body);
 
     return res.status(200).json(result);
+  }
+
+  public async updateStandardForm(req: Request, res: Response): Promise<Response> {
+    const id = super.getIdParam(req);
+
+    const topicService = container.resolve(TopicsService);
+    const formService = container.resolve(FormsService);
+
+    const topic = await topicService.findById(id);
+
+    if (!topic) {
+      throw new AppError('Topic not found');
+    }
+
+    if (!topic.forms[0].id) {
+      throw new AppError('Topic has no form');
+    }
+
+    const form = await formService.update(topic.forms[0].id, req.body);
+
+    return res.status(200).json({
+      topic,
+      form,
+    });
   }
 
   public async delete(req: Request, res: Response): Promise<Response> {

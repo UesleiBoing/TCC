@@ -43,6 +43,15 @@ export default class ClassesController extends Controller {
     return res.status(200).json(result);
   }
 
+  public async rankStudentsByGrade(req: Request, res: Response): Promise<Response> {
+    const id = super.getIdParam(req);
+
+    const service = container.resolve(ClassesService);
+    const result = await service.rankStudentsByGrade(id);
+
+    return res.status(200).json(result);
+  }
+
   public async update(req: Request, res: Response): Promise<Response> {
     const id = super.getIdParam(req);
 

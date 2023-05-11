@@ -70,6 +70,10 @@ const CreateKeywords: React.FC = () => {
           }
 
           toast.success('Dados enviados com sucesso');
+
+          if (keyword_id) {
+            navigate(`/topics/${topic_id}/keywords`);
+          }
       } catch (error: any) {
           const { message } = handleAxiosError(error);
           toast.error(`Ops... ${message}`);      

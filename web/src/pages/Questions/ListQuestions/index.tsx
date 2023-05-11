@@ -2,6 +2,8 @@ import React, { useEffect, useState } from 'react';
 
 import { Button, ButtonBase } from '@mui/material';
 import { Form } from '@unform/web';
+import { FaTrash } from 'react-icons/fa';
+import { FiEdit } from 'react-icons/fi';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 
 import DataTable from 'components/DataTable';
@@ -82,13 +84,7 @@ const ListQuestions: React.FC = () => {
       <DataTable
         title="Questões"
         data={questions}
-        metadata={[
-          {
-            prop: 'id',
-            label: 'Código',
-            primaryKey: true,
-            numeric: true
-          }, 
+        metadata={[ 
           {
             prop: 'description',
             label: 'Descrição'
@@ -114,14 +110,14 @@ const ListQuestions: React.FC = () => {
               to={`/topics/${topic_id}/questions/${id}`}
               variant="contained"
               color='secondary'>
-              Editar
+              <FiEdit />
             </Button>
 
             <Button onClick={(e) => handleDeleteQuestion(e, id)}
               type='button'
               variant="contained"
               color='error'>
-              Remover
+              <FaTrash />	
             </Button>
           </>
         )}

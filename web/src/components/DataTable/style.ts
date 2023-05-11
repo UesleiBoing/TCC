@@ -31,6 +31,11 @@ export const ButtonGroup = styled.div`
       height: 40px;
       font-size: .7rem;
       padding: 0 10px;
+
+      svg {
+        font-size: 1.5rem;
+        font-weight: bold;
+      }
     }
   }
 `;

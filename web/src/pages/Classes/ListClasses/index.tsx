@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from 'react';
 
 import { Button } from '@mui/material';
+import { FaTrash } from 'react-icons/fa';
+import { FiEdit } from 'react-icons/fi';
 import { Link, useNavigate } from 'react-router-dom';
 
 import DataTable from 'components/DataTable';
@@ -77,13 +79,7 @@ const ListClasses: React.FC = () => {
       <DataTable
         title="Turmas"
         data={classes}
-        metadata={[
-          {
-            prop: 'id',
-            label: 'Código',
-            primaryKey: true,
-            numeric: true
-          }, 
+        metadata={[ 
           {
             prop: 'title',
             label: 'Título'
@@ -108,14 +104,14 @@ const ListClasses: React.FC = () => {
               to={`/classes/${id}`}
               variant="contained"
               color='secondary'>
-              Editar
+              <FiEdit />
             </Button>
 
             <Button onClick={(e) => handleDeleteClasse(e, id)}
               type='button'
               variant="contained"
               color='error'>
-              Remover
+              <FaTrash />	
             </Button>
           </>
         )}

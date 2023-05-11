@@ -5,6 +5,7 @@ import { errorColor, successColor } from "styles/variables";
 const defaultPatterns: ToastOptions = {
     position: "top-right",
     autoClose: 5000,
+    delay: 100,
     hideProgressBar: false,
     closeOnClick: true,
     pauseOnHover: true,
@@ -36,6 +37,7 @@ export default class Style {
     ): UpdateOptions<unknown> {
         return ({
             ...defaultPatterns,
+            autoClose: 1000,
             render: message,
             type: "success",
             isLoading: false,

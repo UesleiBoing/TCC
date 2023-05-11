@@ -13,6 +13,7 @@ import FormBuilder from "components/Form/FormBuilder";
 import IOption from "components/Form/Select/IOption";
 import Title from "components/Typography/Title";
 
+import { useAuth } from "hooks/auth";
 import { useForm } from "hooks/form/useForm";
 import handleAxiosError from "hooks/handleAxiosError";
 import Toast from "hooks/toast/Toast";
@@ -42,7 +43,8 @@ const enabledQuantity = [5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 
 
 const GenerateForms: React.FC = () => {
 	const { topic: topic_id } = useParams();
-	
+	const { user } = useAuth();
+
 	const [topic, setTopic] = useState<Topic>();
 	const [quantity, setQuantity] = useState<IOption[]>([]);
 	const [keywords, setKeywords] = useState<IOption[]>([]);
@@ -103,8 +105,10 @@ const GenerateForms: React.FC = () => {
 		try {
 			await api.post("/forms/generate", data);
 			form.clear();
-
+			
 			toast.success("Dados enviados com sucesso");
+
+			navigate(`/${user.isTeacher ? "forms" : "tests"}}`)
 		} catch (error: any) {
 			const { message } = handleAxiosError(error);
 			toast.error(`Ops... ${message}`);
@@ -129,7 +133,6 @@ const GenerateForms: React.FC = () => {
 	);
 
 	useEffect(() => {
-		console.log(`/topics/${topic_id}/keywords`)
 		Promise.all([
 			api.get(`/topics/${topic_id}/keywords`).then(({ data }) => {
 				setKeywords(

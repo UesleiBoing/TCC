@@ -14,6 +14,7 @@ import ListTopicsForms from 'pages/Forms/ListForms';
 import StandardForms from 'pages/Forms/StandardForms';
 import CreateKeywords from 'pages/Keywords/CreateKeywords';
 import ListKeywords from 'pages/Keywords/ListKeywords';
+import Profile from 'pages/Profile';
 import CreateQuestions from 'pages/Questions/CreateQuestions';
 import ListQuestions from 'pages/Questions/ListQuestions';
 import SignIn from 'pages/SignIn';
@@ -22,6 +23,8 @@ import ListStudents from 'pages/Students/ListStudents';
 import CreateSubjects from 'pages/Subjects/CreateSubjects';
 import ListSubjects from 'pages/Subjects/ListSubjects';
 import ListTeachers from 'pages/Teachers/ListTeachers';
+import AnswerTest from 'pages/Tests/AnswerTest';
+import ListTests from 'pages/Tests/ListTests';
 import CreateTopics from 'pages/Topics/CreateTopics';
 import ListTopics from 'pages/Topics/ListTopics';
 
@@ -50,6 +53,7 @@ const Routes: React.FC = () => (
     <Route path="/" element={<SignIn />} />
     <Route path="/sign-in" element={<SignIn />} />
     <Route path="/sign-up" element={<SignUp />} />
+    <Route path="/profile" element={protect(<Profile />)} />
     <Route path="/dashboard" element={protect(<Dashboard />)} />
     <Route path="/teachers" element={protect(<ListTeachers />)} />
     <Route path="/students" element={protect(<ListStudents />)} />
@@ -99,7 +103,11 @@ const Routes: React.FC = () => (
     <Route path="/subjects/:id" element={
       protect(<CreateSubjects />, ONLY_TEACHERS)} 
     />
-    
+
+    <Route path="/tests" element={protect(<ListTests />)} />
+    <Route path="/tests/:id" element={
+      protect(<AnswerTest />)} 
+    />
     <Route path="*" element={<Navigate to={'/'}/>} />
   </SwitchRoutes>
 );

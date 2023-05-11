@@ -14,6 +14,7 @@ interface IRequest {
   description: string
   order?: number
   topic_id: number
+  active: boolean
 
   questions: number[]
 }
@@ -54,11 +55,49 @@ export default class FormsService extends Service {
     return form;
   }
 
-  handleIncludesInFindById({ questions, answers }: RequestFindById) {
+  public async findFormsOfStudent(student_id: number) {
+    const forms = await this.client.findMany({
+      where: {
+        active: true,
+        topic: {
+          classes: {
+            classes_students: {
+              some: {
+                student_id,
+              },
+            },
+          },
+        },
+        tests: {
+        },
+      },
+      include: {
+        tests: {
+          where: {
+            student_id,
+          },
+          take: 1,
+          orderBy: {
+            grade_ten: 'desc',
+          },
+        },
+        topic: {
+          include: {
+            classes: true,
+          },
+        },
+      },
+      orderBy: { id: 'asc' },
+    });
+
+    return forms;
+  }
+
+  handleIncludesInFindById({ questions, answers }: RequestFindById): object | undefined {
     let includeAnswers;
     if (answers) {
       includeAnswers = answers
-        ? { include: { answers: true } }
+        ? { include: { answers: { orderBy: { order: 'asc' } } } }
         : true;
     }
 
@@ -66,7 +105,10 @@ export default class FormsService extends Service {
     let includeQuestions;
     if (questions) {
       includeQuestions = questions
-        ? { include: { question: includeAnswers } }
+        ? {
+          include: { question: includeAnswers },
+          orderBy: { question: { order: 'asc' } },
+        }
         : undefined;
 
       includeFormQuestions = { include: { formQuestions: includeQuestions } };
@@ -113,16 +155,31 @@ export default class FormsService extends Service {
     const formCreated = this.create({
       ...data,
       questions: questionsIds,
+      active: true,
     });
 
     return formCreated;
+  }
+
+  public prepareQuestions(questions?: number[]) {
+    if (!questions) {
+      return {};
+    }
+
+    return {
+      formQuestions: {
+        createMany: {
+          data: questions.map((question) => ({ question_id: question })),
+        },
+      },
+    };
   }
 
   public async create(data: IRequest): Promise<Form> {
     data = super.removeMask(data) as IRequest;
 
     let {
-      title, description, order, topic_id, questions,
+      title, description, order, topic_id, questions, active,
     } = data;
 
     await FormRequest.create({
@@ -141,6 +198,7 @@ export default class FormsService extends Service {
         description,
         order: orderHandled,
         topic_id,
+        active,
         formQuestions: {
           createMany: {
             data: questions.map((question) => ({ question_id: question })),
@@ -160,28 +218,11 @@ export default class FormsService extends Service {
     return form;
   }
 
-  public prepareQuestionsQueryBuilder(questions: QuestionFromRequest[]) {
-    return {
-      questions: {
-        createMany: questions.map((question) => ({
-          description: question.description,
-          type: question.type,
-          correct_answer: question.correct_answer,
-          weight: question.weight,
-          order: question.order,
-          answers: {
-            createMany: question.answers,
-          },
-        })),
-      },
-    };
-  }
-
   public async update(id: number, data: IRequest): Promise<Form> {
     data = super.removeMask(data) as IRequest;
 
     let {
-      title, description, order, topic_id, questions,
+      title, description, order, topic_id, questions, active,
     } = data;
 
     await FormRequest.update({
@@ -190,6 +231,8 @@ export default class FormsService extends Service {
       description,
       order,
       topic_id,
+      questions,
+      active,
     });
 
     const orderHandled = await this.getOrderHandled({
@@ -197,12 +240,21 @@ export default class FormsService extends Service {
       order,
     });
 
+    if (questions) {
+      await client.formQuestion.deleteMany({
+        where: {
+          form_id: id,
+        },
+      });
+    }
     const form = await this.client.update({
       data: {
         title,
         description,
         order: orderHandled,
         topic_id,
+        active,
+        ...this.prepareQuestions(questions),
       },
       where: { id },
     });
