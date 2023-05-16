@@ -52,7 +52,7 @@ const SignIn: React.FC = () => {
         toast.dismiss();
       } catch (error) {
         
-        toast.error('There was an error logging in, check your credentials.')                
+        toast.error('Erro ao realizar login, e-mail e/ou senha incorretos.')                
       }
     },
     [navigate, signIn, isTeacher],

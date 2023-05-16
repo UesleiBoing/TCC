@@ -46,6 +46,12 @@ const ListQuestions: React.FC = () => {
   useEffect(() => {
     Promise.all([
       api.get(`/topics/${topic_id}/questions`).then(({ data }) => {
+        data = data.map( (i : any) => {
+          return {
+            ...i,
+            description: i.description.length > 50 ? i.description.substring(0, 50) + '...' : i.description
+          }
+        })
         setQuestions(data);
       }),
       api.get(`/topics/${topic_id}`).then(({ data }) => {

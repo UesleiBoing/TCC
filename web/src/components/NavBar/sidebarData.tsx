@@ -11,7 +11,7 @@ export const sidebarDataTeacher = [
         { title: 'Home',        path: '/ranking',     icon: <AiFillHome />,     },
         { title: 'Perfil',      path: '/profile',       icon: <FiUser />,     },
         { title: 'Estudantes',  path: '/students',      icon: <FaUserGraduate />, },
-        { title: 'Professores', path: '/teachers',      icon: <FaUserTie />,      },
+       // { title: 'Professores', path: '/teachers',      icon: <FaUserTie />,      },
     ],
     [
         { title: 'Matérias',    path: '/subjects',      icon: <MdSubject />,      },

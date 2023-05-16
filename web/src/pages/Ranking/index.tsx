@@ -80,9 +80,18 @@ const Ranking = () =>
     form.setData({ class_id });
 
     api.get(`classes/${class_id}/rank`).then(({ data }) => {
+      data = data.sort(
+        (a: any, b: any) => Number(b.sum_grade) - Number(a.sum_grade)
+      ).map((objeto: any, index: any) => {
+        return {
+          ...objeto,
+          id: index
+        }
+      })
+
       setData(data)
-    });
-  }
+    });
+  }
 
   return (
     <MainDefault>

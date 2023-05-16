@@ -187,7 +187,7 @@ export default class ClassesService extends Service {
       },
     });
 
-    const studentsWithGrade: StudentWithGrade[] = students.map((student) => ({
+    let studentsWithGrade: StudentWithGrade[] = students.map((student) => ({
       ...student,
       sum_grade: 0,
     }));
@@ -201,7 +201,11 @@ export default class ClassesService extends Service {
       studentsWithGrade[studentIndex].sum_grade += gradeToAdd;
     });
 
-    return studentsWithGrade;
+    return studentsWithGrade.sort((a: any, b: any) => {
+      if (a.sum_grade < b.sum_grade) return 1;
+      if (a.sum_grade > b.sum_grade) return -1;
+      return 0;
+    });
   }
 
   public async create(data: IRequest): Promise<Class> {

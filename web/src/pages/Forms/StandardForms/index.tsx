@@ -178,7 +178,7 @@ const StandardForms: React.FC = () => {
 									isSelected={selectedQuestions.includes(question.id)}
 									onClick={() => handleClickQuestion(question.id)}
 								>
-									{question.description}
+									{question.description.length > 60 ? question.description.substring(0, 60) + '...' : question.description}
 								</QuestionCard>
 							))
 						}

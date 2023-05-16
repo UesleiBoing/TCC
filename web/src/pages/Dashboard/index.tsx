@@ -98,11 +98,10 @@ const Dashboard = () =>
               ...topic,
               icon: {
                 icon,
-                id: topic.id,
+                id: topic.forms ? topic.forms[0].id : topic.id,
               },
             }
           });
-
           return (
             <React.Fragment key={classe.id}>
               <TitleClass>{classe.title}</TitleClass>
