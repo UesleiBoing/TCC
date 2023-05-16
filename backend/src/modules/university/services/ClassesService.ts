@@ -33,6 +33,48 @@ export default class ClassesService extends Service {
 
   client = client.class;
 
+  public async findFormsStandards(student_id: number) {
+    const classes = await this.client.findMany({
+      include: {
+        topics: {
+          include: {
+            forms: {
+              orderBy: {
+                created_at: 'asc',
+              },
+              where: {
+                standard: true,
+                active: true,
+              },
+              include: {
+                tests: {
+                  where: {
+                    student_id,
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+      where: {
+        topics: {
+          some: {
+            forms: {
+              some: {
+                standard: true,
+                active: true,
+
+              },
+            },
+          },
+        },
+      },
+    });
+
+    return classes;
+  }
+
   public async findById(id: number) {
     const classe = await this.client.findFirst({
       where: { id },

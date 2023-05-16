@@ -1,5 +1,6 @@
 import Subject from "./Subject";
 import Teacher from "./Teacher";
+import Topic from "./Topic";
 
 export default interface Classe {
 	id: number;
@@ -12,4 +13,6 @@ export default interface Classe {
 
   teacher?: Teacher;
   subject?: Subject;
+
+	topics?: Topic[];
 }

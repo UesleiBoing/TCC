@@ -3,12 +3,7 @@ import React, { useCallback, useEffect, useState } from 'react';
 import SendIcon from '@mui/icons-material/Send';
 import { Button } from '@mui/material';
 import { Form as FormUnform } from '@unform/web';
-import { AiOutlineShop }                                   from 'react-icons/ai';
-import { FaMapMarkerAlt }                                  from 'react-icons/fa';
-import { FiArrowLeft, FiLock }                             from 'react-icons/fi';
-import { GiSmartphone }                                    from 'react-icons/gi';
-import { HiOutlineDocumentText }                           from 'react-icons/hi';
-import { MdOutlineAlternateEmail, MdOutlineDescription }   from 'react-icons/md';
+import { AiOutlineBook, AiOutlineLock, AiOutlineStar } from 'react-icons/ai';
 import { Link, useLocation, useNavigate }                  from 'react-router-dom';
 
 import DataTable from 'components/DataTable';
@@ -23,6 +18,9 @@ import { useForm } from 'hooks/form/useForm';
 import handleAxiosError from 'hooks/handleAxiosError';
 import Toast          from 'hooks/toast/Toast';
 
+import Classe from 'interfaces/entities/Classe';
+import Topic from 'interfaces/entities/Topic';
+
 import api from 'services/api';
 
 import Mask from 'utils/Mask';
@@ -31,13 +29,16 @@ import { MainDefault } from 'styles/styled-components/MainDefault';
 
 import logo from '../../assets/logo.svg'
 
-import { Container, ContainerDemonstracao, MaxSize } from './styles';
+import { Container, ContainerDemonstracao, MaxSize, Situation, TitleClass } from './styles';
 import { schema } from './validation/schema';
 
-import './styles.css';
 import 'react-toastify/dist/ReactToastify.css';
 
-
+const SITUATION = {
+  OPEN: 'open',
+  CLOSED: 'closed',
+  LOCKED: 'locked',
+}
 interface DataList {
   name: string;
   sum_grade: number;
@@ -45,70 +46,98 @@ interface DataList {
 
 const Dashboard = () =>
 {
+  const [data, setData] = useState<Classe[]>([]);
   
-    
-  const [data, setData] = useState<DataList[]>([]);
-  const [classes, setClasses] = useState<IOption[]>([]);
-  const location = useLocation();
-  const form = useForm({ 
-    schema,
-    fields: [
-      {
-        gridSize: {
-          md: 12,
-        },
-        type: "select",
-        name: "class_id",
-        label: "Classe",
-        options: classes,
-        onChange: handleSubmit,
-      },
-    ]
-  });
-
   useEffect(() => {
-    api.get(`/classes`).then(({ data }) => {
-      setClasses(
-        data.map((classe: any) => ({
-          label: classe.title,
-          value: classe.id,
-        }))
-      );
+    api.get(`/classes/forms`).then(({ data }) => {
+      setData(data);
     });
   }, []);
 
-  function handleSubmit(e: any) {
-    const class_id = e.target.value;
-    form.setData({ class_id });
-
-    api.get(`classes/${class_id}/rank`).then(({ data }) => {
-      setData(data)
-    });
+  const handleSituation = (topic: Topic) => {
+    
   }
 
   return (
     <MainDefault>
-      <FormUnform ref={form.ref} onSubmit={handleSubmit} style={{
-        width: '100%',
-        margin: '30px auto'
-      }}>
-        <FormBuilder fields={form.fields} />
-      </FormUnform>
+      {
+        data.map((classe, index) => {
+          const topics = classe.topics || [];
+          const topicsFormatted = topics.map((topic, index) => {
+            let hasIcon = false;
+            let icon = SITUATION.LOCKED;
+            
+            if (topic?.forms) {
+              if (topic.forms?.length > 0) {
+                if (topic.forms[0].tests) {
+                  if (topic.forms[0].tests.length > 0) {
+                    icon = SITUATION.CLOSED;
+                  } else {
+                    if (index === 0) {
+                      icon = SITUATION.OPEN;
+                    } else {
+                      const lastTopic = topics[index - 1]; 
+                      if (lastTopic?.forms) {
+                        if (lastTopic.forms?.length > 0) {
+                          if (lastTopic.forms[0].tests) {
+                            if (lastTopic.forms[0].tests.length > 0) {
+                              icon = SITUATION.OPEN;
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
 
-      <DataTable
-        title="Ranking de alunos"
-        data={data}
-        metadata={[
-          {
-            prop: 'name',
-            label: 'Aluno'
-          },
-          {
-            prop: 'sum_grade',
-            label: 'Nota'
-          },
-        ]}
-      />
+
+
+            return {
+              ...topic,
+              icon: {
+                icon,
+                id: topic.id,
+              },
+            }
+          });
+
+          return (
+            <React.Fragment key={classe.id}>
+              <TitleClass>{classe.title}</TitleClass>
+              <DataTable
+                title='teset'
+                hasTableHead={false}
+                toolbar={false}
+                pagination={false}
+                denseButton={false}
+                data={topicsFormatted}
+                metadata={[
+                  {
+                    prop: 'icon',
+                    label: 'Situação',
+                    mask: (value: any) => {
+                      let iconsvg = <AiOutlineLock />;
+                      if (value.icon === SITUATION.OPEN) {
+                        iconsvg = <AiOutlineStar />;
+                      } else if (value.icon === SITUATION.CLOSED) {
+                        iconsvg = <AiOutlineBook />;
+                      }
+                      return <Situation typeicon={value.icon} to={`/tests/${value.id}`}>{iconsvg}</Situation>;
+                    }
+                  },
+                  {
+                    prop: 'description',
+                    label: 'Descrição'
+                  },
+                ]}
+              />
+            </React.Fragment>
+          )
+        })
+      }
+      
     </MainDefault>
   )
 }

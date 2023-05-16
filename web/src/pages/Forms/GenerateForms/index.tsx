@@ -108,7 +108,7 @@ const GenerateForms: React.FC = () => {
 			
 			toast.success("Dados enviados com sucesso");
 
-			navigate(`/${user.isTeacher ? "forms" : "tests"}}`)
+			navigate(`/${user.isTeacher ? "forms" : "tests"}`)
 		} catch (error: any) {
 			const { message } = handleAxiosError(error);
 			toast.error(`Ops... ${message}`);

@@ -30,7 +30,7 @@ const AppBar:React.FC<IProps> = ({ setOpen, open })  =>{
           <MenuIcon />
         </IconButton>
         <Typography variant="h6" noWrap component="div">
-          Afonso
+          TCC
         </Typography>
       </Toolbar>
     </MUIAppBar>

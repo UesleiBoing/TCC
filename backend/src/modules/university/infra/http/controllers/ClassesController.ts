@@ -2,12 +2,21 @@ import { Request, Response } from 'express';
 import { container } from 'tsyringe';
 
 import Controller from '@shared/core/Controller';
+import TokenHelper from '@shared/helpers/TokenHelper';
 
 import ClassesService from '@modules/university/services/ClassesService';
 
 import ClassRequest from '../requests/ClassRequest';
 
 export default class ClassesController extends Controller {
+
+  public async findFormsStandards(req: Request, res: Response): Promise<Response> {
+    const { id } = TokenHelper.getSubject(req);
+    const service = container.resolve(ClassesService);
+    const result = await service.findFormsStandards(Number(id));
+
+    return res.status(200).json(result);
+  }
 
   public async create(req: Request, res: Response): Promise<Response> {
     const service = container.resolve(ClassesService);

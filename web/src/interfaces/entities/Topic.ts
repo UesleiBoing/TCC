@@ -10,4 +10,5 @@ export default interface Topic {
 
 	classes?: Classe[];
 	form?: Form;
+	forms?: Form[];
 }

@@ -18,6 +18,7 @@ interface EnhancedTableProps {
 	rowCount: number;
 	haveActions?: boolean;
 	actions?: boolean;
+	hasTableHead?: boolean;
 }
 
 const EnhancedTableHead:React.FC<EnhancedTableProps> = ({
@@ -30,6 +31,7 @@ const EnhancedTableHead:React.FC<EnhancedTableProps> = ({
 	rowCount,
 	onRequestSort,
 	haveActions,
+	hasTableHead = true,
 	actions
 }) => {
 	const createSortHandler =
@@ -37,6 +39,9 @@ const EnhancedTableHead:React.FC<EnhancedTableProps> = ({
 			onRequestSort(event, property);
 		};
 
+	if (!hasTableHead) {
+		return <></>
+	}
 	return (
 		<TableHead>
 			<TableRow>

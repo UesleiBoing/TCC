@@ -4,6 +4,7 @@ import { Button } from '@mui/material';
 import { AiOutlineDelete } from 'react-icons/ai';
 import { FaTrash } from 'react-icons/fa';
 import { FiEdit } from 'react-icons/fi';
+import { MdBlock, MdOutlineBlock } from 'react-icons/md';
 import { Link } from 'react-router-dom';
 
 import DataTable from 'components/DataTable';
@@ -19,7 +20,8 @@ import api from 'services/api';
 import { ButtonGroupEnd } from 'styles/styled-components/ButtonGroupEnd';
 import { MainDefault } from 'styles/styled-components/MainDefault';
 
-import { ButtonGroup, PendentTestElementTable } from './style';
+import { ButtonBlock, ButtonGroup, PendentTestElementTable } from './style';
+
 
 interface FormsList extends Form {
   grade: string;
@@ -64,7 +66,7 @@ const ListTests: React.FC = () => {
           },
           {
             prop: 'topic.description',
-            label: 'Tópico',
+            label: 'Nível',
           },
           {
             prop: 'topic.classes.title',
@@ -82,14 +84,23 @@ const ListTests: React.FC = () => {
             }
           },
         ]}
-        actions={({ id }) => (
+        actions={(row) => (
           <>
-            <Button component={Link}
-              to={`/tests/${id}`}
-              variant="contained"
-              color='primary'>
-              <FiEdit />
-            </Button>
+            {
+              row.grade === 'Pendente' ? (
+                <Button component={Link}
+                  to={`/tests/${row.id}`}
+                  variant="contained"
+                  color='primary'>
+                  <FiEdit />
+                </Button>
+              ) : (
+                <ButtonBlock>
+                  <MdOutlineBlock />
+                </ButtonBlock>
+              )
+            }
+           
           </>
         )}
       />

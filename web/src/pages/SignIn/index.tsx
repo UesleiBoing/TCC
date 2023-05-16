@@ -43,7 +43,11 @@ const SignIn: React.FC = () => {
       try {
         await signIn({ isTeacher, ...data });
         
-        navigate('/dashboard');
+        if (isTeacher) {
+          navigate('/ranking');
+        } else {
+          navigate('/dashboard');
+        }
         
         toast.dismiss();
       } catch (error) {

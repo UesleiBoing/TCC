@@ -29,9 +29,9 @@ const ListTopicsForms: React.FC = () => {
     api.delete(`/topics/${id}`)
       .then(({ data }) => {
         setTopics(topics.filter(topic => topic.id !== id));
-        new Toast().success('Tópico deletado com sucesso!')
+        new Toast().success('Nível deletado com sucesso!')
       })
-      .catch((err) => new Toast().error('Impossível deletar o tópico!'));
+      .catch((err) => new Toast().error('Impossível deletar o Nível!'));
   }
 
   useEffect(() => {
@@ -60,7 +60,7 @@ const ListTopicsForms: React.FC = () => {
         </Button>
       </ButtonGroupEnd>
       <DataTable
-        title="Tópicos"
+        title="Formulários"
         data={topics}
         metadata={[ 
           {
@@ -74,7 +74,6 @@ const ListTopicsForms: React.FC = () => {
         ]}
         actions={({ id }) => (
           <>
-          
             { 
               user.isTeacher && 
                 <Button component={Link}

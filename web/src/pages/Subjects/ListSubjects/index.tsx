@@ -32,9 +32,9 @@ const ListSubjects: React.FC = () => {
     api.delete(`/subjects/${id}`)
       .then(({ data }) => {
         setSubjects(subjects.filter(subject => subject.id !== id));
-        new Toast().success('Tópico deletado com sucesso!')
+        new Toast().success('Nível deletado com sucesso!')
       })
-      .catch((err) => new Toast().error('Impossível deletar o tópico!'));
+      .catch((err) => new Toast().error('Impossível deletar o Nível!'));
   }
 
   useEffect(() => {

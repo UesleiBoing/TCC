@@ -38,8 +38,8 @@ const AuthContext = createContext<IAuthContextData>({} as IAuthContextData);
 
 export const AuthProvider: React.FC<PropsWithChildren<{}>> = ({ children }) => {
   const [data, setData] = useState<IAuthState>(() => {
-    const token = localStorage.getItem('@AFONSO:token');
-    const user = localStorage.getItem('@AFONSO:user');
+    const token = localStorage.getItem('@TCC:token');
+    const user = localStorage.getItem('@TCC:user');
 
     if (token && user) {
       api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
@@ -55,8 +55,8 @@ export const AuthProvider: React.FC<PropsWithChildren<{}>> = ({ children }) => {
     const response = await api.post(`/login${isTeacherLogin}`, { email, password, isTeacher });
     const { token, user } = response.data;
    
-    localStorage.setItem('@AFONSO:token', token);
-    localStorage.setItem('@AFONSO:user', JSON.stringify(user));
+    localStorage.setItem('@TCC:token', token);
+    localStorage.setItem('@TCC:user', JSON.stringify(user));
 
     api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
 
@@ -64,15 +64,15 @@ export const AuthProvider: React.FC<PropsWithChildren<{}>> = ({ children }) => {
   }, []);
 
   const signOut = useCallback(() => {
-    localStorage.removeItem('@AFONSO:token');
-    localStorage.removeItem('@AFONSO:user');
-    localStorage.removeItem('@AFONSO:settings');
+    localStorage.removeItem('@TCC:token');
+    localStorage.removeItem('@TCC:user');
+    localStorage.removeItem('@TCC:settings');
 
     setData({} as IAuthState);
   }, []);
   
   const isTeacher = useCallback(() => {
-    const user = localStorage.getItem('@AFONSO:user');
+    const user = localStorage.getItem('@TCC:user');
     
     if (user) {
       const userParsed = JSON.parse(user) as IUser;
@@ -85,7 +85,7 @@ export const AuthProvider: React.FC<PropsWithChildren<{}>> = ({ children }) => {
 
   const updateUser = useCallback(
     (user: IUser) => {
-      localStorage.setItem('@AFONSO:user', JSON.stringify(user));
+      localStorage.setItem('@TCC:user', JSON.stringify(user));
 
       setData({
         token: data.token,

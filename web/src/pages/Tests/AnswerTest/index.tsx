@@ -198,7 +198,12 @@ const AnswerTest: React.FC = () => {
 				<FinalGradeButtonGroup>
 					<Button type='submit' 
 						fullWidth
-						onClick={() => navigate('/tests')}
+						onClick={() => {
+							if (form?.standard) {
+								navigate('/dashboard')
+							}
+							navigate('/tests')
+						}}
 						variant='contained'>
 						
 						Finalizar

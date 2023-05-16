@@ -38,6 +38,7 @@ const DataTable: React.FC<DataTableProps> = ({
   pagination = true,
 	data: preLoadedData,
 	haveActions = true,
+	hasTableHead = true,
 	actions,
 	url
 }) => {
@@ -176,18 +177,21 @@ const DataTable: React.FC<DataTableProps> = ({
 					<Table 
 						aria-labelledby='tableTitle'
 						size={dense ? "small" : "medium"}>
-						<EnhancedTableHead
-              checkbox={checkbox}
-							metadata={metadata}
-							numSelected={selected.length}
-							order={order}
-							orderBy={orderBy}
-							onSelectAllClick={handleSelectAllClick}
-							onRequestSort={handleRequestSort}
-							rowCount={rows.length}
-							haveActions={!!haveActions}
-							actions={!!actions}
-						/>
+						{hasTableHead && (
+							<EnhancedTableHead
+								checkbox={checkbox}
+								metadata={metadata}
+								numSelected={selected.length}
+								order={order}
+								orderBy={orderBy}
+								onSelectAllClick={handleSelectAllClick}
+								onRequestSort={handleRequestSort}
+								rowCount={rows.length}
+								haveActions={!!haveActions}
+								actions={!!actions}
+							/>
+						)}
+
 						<TableBody>
 							{stableSort(rows, getComparator(order, orderBy))
 								.slice(

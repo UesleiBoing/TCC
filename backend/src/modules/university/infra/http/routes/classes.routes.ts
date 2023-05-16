@@ -11,6 +11,7 @@ const classesController = new ClassesController();
 classesRouter.get('/', ensureAuthenticationStudentsTeachers, classesController.find);
 classesRouter.get('/:id/rank', ensureAuthenticationStudentsTeachers, classesController.rankStudentsByGrade);
 classesRouter.get('/of-student/:student_id', ensureAuthenticationStudentsTeachers, classesController.findByStudent);
+classesRouter.get('/forms', ensureAuthenticationStudentsTeachers, classesController.findFormsStandards);
 classesRouter.get('/:id', ensureAuthenticationStudentsTeachers, classesController.findOne);
 classesRouter.post('/', ensureAuthenticationTeachers, classesController.create);
 classesRouter.put('/:id', ensureAuthenticationTeachers, classesController.update);

@@ -30,6 +30,7 @@ import ListTopics from 'pages/Topics/ListTopics';
 
 import { useAuth } from '../hooks/auth';
 import Dashboard from '../pages/Dashboard';
+import Ranking from '../pages/Ranking';
 
 const ONLY_TEACHERS = true;
 
@@ -55,6 +56,7 @@ const Routes: React.FC = () => (
     <Route path="/sign-up" element={<SignUp />} />
     <Route path="/profile" element={protect(<Profile />)} />
     <Route path="/dashboard" element={protect(<Dashboard />)} />
+    <Route path="/ranking" element={protect(<Ranking />)} />
     <Route path="/teachers" element={protect(<ListTeachers />)} />
     <Route path="/students" element={protect(<ListStudents />)} />
     

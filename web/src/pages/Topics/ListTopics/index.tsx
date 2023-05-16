@@ -31,9 +31,9 @@ const ListTopics: React.FC = () => {
     api.delete(`/topics/${id}`)
       .then(({ data }) => {
         setTopics(topics.filter(topic => topic.id !== id));
-        new Toast().success('Tópico deletado com sucesso!')
+        new Toast().success('Nível deletado com sucesso!')
       })
-      .catch((err) => new Toast().error('Impossível deletar o tópico!'));
+      .catch((err) => new Toast().error('Impossível deletar o Nível!'));
   }
 
   useEffect(() => {
@@ -57,7 +57,7 @@ const ListTopics: React.FC = () => {
               variant="contained"
               to="/topics/create" 
               color='success'>
-              Cadastrar Tópico
+              Cadastrar Nível
             </Button>
           }
 
@@ -72,7 +72,7 @@ const ListTopics: React.FC = () => {
 
         </ButtonGroupEnd>
       <DataTable
-        title="Tópicos"
+        title="Níveis"
         data={topics}
         metadata={[ 
           {

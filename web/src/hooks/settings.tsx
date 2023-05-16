@@ -23,7 +23,7 @@ export const SettingsProvider: React.FC<PropsWithChildren<{}>> = ({ children }) 
 
   const { user } = useAuth();
   const [data, setData] = useState<ISettingsState>(() => {
-    const settings = localStorage.getItem('@AFONSO:settings');
+    const settings = localStorage.getItem('@TCC:settings');
 
     if (settings) {
       return JSON.parse(settings);
@@ -33,7 +33,7 @@ export const SettingsProvider: React.FC<PropsWithChildren<{}>> = ({ children }) 
   });
 
   const saveSettings = useCallback(async (data: ISettingsState) => {
-    localStorage.setItem('@AFONSO:settings', JSON.stringify(data));
+    localStorage.setItem('@TCC:settings', JSON.stringify(data));
 
     setData(data);
   }, []);

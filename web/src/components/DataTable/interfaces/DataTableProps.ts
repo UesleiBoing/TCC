@@ -5,6 +5,7 @@ interface DefaultProps {
 
 	title?: string;
   dense?: boolean;
+  hasTableHead?: boolean;
   selectable?: boolean;
   toolbar?: boolean;
   denseButton?: boolean;
