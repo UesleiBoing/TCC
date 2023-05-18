@@ -87,6 +87,7 @@ const Ranking = () =>
         .map((objeto: any, index: any) => {
           return {
             ...objeto,
+            ranking: index + 1 + 'º',
             id: index,
             currentId: objeto.id,
             sum_grade: parseFloat(objeto.sum_grade.toFixed(2))
@@ -124,6 +125,10 @@ const Ranking = () =>
         title="Ranking de alunos"
         data={data}
         metadata={[
+          {
+            prop: 'ranking',
+            label: ''
+          },
           {
             prop: 'name',
             label: 'Aluno'

@@ -117,11 +117,11 @@ const Dashboard = () =>
                     prop: 'icon',
                     label: 'Situação',
                     mask: (value: any) => {
-                      let iconsvg = <AiOutlineLock />;
+                      let iconsvg = <AiOutlineLock color='grey'/>;
                       if (value.icon === SITUATION.OPEN) {
-                        iconsvg = <AiOutlineStar />;
+                        iconsvg = <AiOutlineStar/>;
                       } else if (value.icon === SITUATION.CLOSED) {
-                        iconsvg = <AiOutlineBook />;
+                        iconsvg = <AiOutlineBook color='green' />;
                       }
                       return <Situation typeicon={value.icon} to={`/tests/${value.id}`}>{iconsvg}</Situation>;
                     }
