@@ -26,6 +26,15 @@ export default class TopicsController extends Controller {
     return res.status(200).json(result);
   }
 
+  public async mostUsedKeywords(req: Request, res: Response): Promise<Response> {
+    const id = super.getIdParam(req);
+
+    const service = container.resolve(TopicsService);
+    const result = await service.mostUsedKeywords(id);
+
+    return res.status(200).json(result);
+  }
+
   public async findOne(req: Request, res: Response): Promise<Response> {
     const id = super.getIdParam(req);
 

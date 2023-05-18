@@ -12,6 +12,7 @@ topicsRouter.get('/', ensureAuthenticationStudentsTeachers, topicsController.fin
 topicsRouter.get('/:id', ensureAuthenticationStudentsTeachers, topicsController.findOne);
 topicsRouter.get('/of-student/:student_id', ensureAuthenticationStudentsTeachers, topicsController.findByStudent);
 topicsRouter.get('/:id/keywords', ensureAuthenticationStudentsTeachers, topicsController.findKeywords);
+topicsRouter.get('/:id/keywords/most', ensureAuthenticationStudentsTeachers, topicsController.mostUsedKeywords);
 topicsRouter.get('/:id/questions', ensureAuthenticationStudentsTeachers, topicsController.findQuestions);
 topicsRouter.post('/', ensureAuthenticationTeachers, topicsController.create);
 topicsRouter.put('/:id/standard-form', ensureAuthenticationTeachers, topicsController.updateStandardForm);

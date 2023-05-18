@@ -158,7 +158,8 @@ export default class ClassesService extends Service {
     const gradeByStudent = await client.$queryRaw`
      SELECT tests.form_id, 
             tests.student_id, 
-            ROUND(MAX(tests.grade_ten * tests.grade), 2) AS "grade"
+            tests.grade AS "grade"
+     --       ROUND(MAX(tests.grade_ten * tests.grade), 2) AS "grade"
        FROM tests
        JOIN forms ON
             forms.id = tests.form_id
@@ -170,7 +171,7 @@ export default class ClassesService extends Service {
             students.id = classes_studentes.student_id
       WHERE classes_studentes.class_id = ${class_id}
         AND topics.class_id = ${class_id}
-      GROUP BY tests.form_id, tests.student_id
+    --  GROUP BY tests.form_id, tests.student_id
    ` as StudentRankQueryResult[];
 
     const student_ids = [...new Set(gradeByStudent.map((student) => student.student_id))];

@@ -201,8 +201,9 @@ const AnswerTest: React.FC = () => {
 						onClick={() => {
 							if (form?.standard) {
 								navigate('/dashboard')
+							} else {
+								navigate('/tests')
 							}
-							navigate('/tests')
 						}}
 						variant='contained'>
 						

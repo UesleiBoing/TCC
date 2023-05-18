@@ -1,3 +1,4 @@
+import { Keyword } from '@prisma/client';
 import { injectable } from 'tsyringe';
 
 import Service from '@shared/core/Service';
@@ -11,6 +12,9 @@ interface IRequest {
   class_id: number;
 }
 
+interface KeywordCount extends Keyword {
+  count: BigInt
+}
 @injectable()
 export default class TopicsService extends Service {
 
@@ -29,6 +33,28 @@ export default class TopicsService extends Service {
     });
 
     return topic;
+  }
+
+  public async mostUsedKeywords(topic_id: number) {
+    const keywords = await client.$queryRaw` 
+       SELECT keywords.id, keywords.description, count(keyword_id) 
+         FROM keywords_questions
+         JOIN keywords ON
+              keywords.id = keywords_questions.keyword_id
+         JOIN topics ON
+              topics.id = keywords.topic_id
+        WHERE topics.id = ${topic_id}  
+        GROUP BY keywords.id, keywords.description
+        ORDER BY count DESC
+        LIMIT 3
+      ` as KeywordCount[];
+
+    const keywordsWithNoBignit = keywords.map((keyword) => ({
+      ...keyword,
+      count: keyword.count.toString(),
+    }));
+
+    return keywordsWithNoBignit;
   }
 
   public async findAll(data: object = {}) {

@@ -4,6 +4,7 @@ import { Button, ButtonBase } from '@mui/material';
 import { Form } from '@unform/web';
 import { FaTrash } from 'react-icons/fa';
 import { FiEdit } from 'react-icons/fi';
+import { MdImportantDevices } from 'react-icons/md';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 
 import DataTable from 'components/DataTable';
@@ -22,7 +23,7 @@ import api from 'services/api';
 import { ButtonGroupEnd } from 'styles/styled-components/ButtonGroupEnd';
 import { MainDefault } from 'styles/styled-components/MainDefault';
 
-import { ButtonGroup, TitleSection } from './style';
+import { ButtonGroup, MostUsedBlock, TitleSection } from './style';
 
 const ListKeywords: React.FC = () => {
 
@@ -30,6 +31,7 @@ const ListKeywords: React.FC = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
   const [keywords, setKeywords] = useState<Keyword[]>([]);
+  const [mostUsedKeywords, setMostUsedKeywords] = useState<Keyword[]>([]);
   const [topic, setTopic] = useState<Topic>();
   
   const handleDeleteKeyword = (e: React.MouseEvent, id:number) => {
@@ -50,6 +52,9 @@ const ListKeywords: React.FC = () => {
       }
       setKeywords(data.keywords);
       setTopic(data);
+    });
+    api.get(`/topics/${topic_id}/keywords/most`).then(({ data }) => {
+      setMostUsedKeywords(data);
     });
   }, []);
   
@@ -84,8 +89,27 @@ const ListKeywords: React.FC = () => {
         metadata={[ 
           {
             prop: 'description',
-            label: 'Descrição'
+            label: 'Descrição',
           },
+          {
+            prop: 'id',
+            label: 'Mais Usado?',
+            mask: (value: string) => {
+              const mostUsed = mostUsedKeywords
+                .find(keyword => Number(keyword.id) === Number(value));
+
+              if (mostUsed) {
+                return (
+                  <MostUsedBlock>
+                    <MdImportantDevices />
+                  </MostUsedBlock>
+                )
+              }
+
+              return '';
+            },
+          }
+
         ]}
         actions={({ id }) => (
           <>

@@ -45,6 +45,8 @@ interface DataList {
 
 const Ranking = () =>
 {    
+  const { user } = useAuth();
+  const [position, setPosition] = useState<number>(0);
   const [data, setData] = useState<DataList[]>([]);
   const [classes, setClasses] = useState<IOption[]>([]);
   const location = useLocation();
@@ -80,18 +82,28 @@ const Ranking = () =>
     form.setData({ class_id });
 
     api.get(`classes/${class_id}/rank`).then(({ data }) => {
-      data = data.sort(
-        (a: any, b: any) => Number(b.sum_grade) - Number(a.sum_grade)
-      ).map((objeto: any, index: any) => {
-        return {
-          ...objeto,
-          id: index
+      data = data
+        .sort((a: any, b: any) => Number(b.sum_grade) - Number(a.sum_grade))
+        .map((objeto: any, index: any) => {
+          return {
+            ...objeto,
+            id: index,
+            currentId: objeto.id,
+            sum_grade: parseFloat(objeto.sum_grade.toFixed(2))
+          }
+        });
+
+      let actualPosition = 0;
+      data.forEach((objeto: any, index: any) => {
+        if (objeto.currentId === user.id) {
+          actualPosition = index + 1;
         }
       })
 
+      setPosition(actualPosition);
       setData(data)
-    });
-  }
+    });
+  }
 
   return (
     <MainDefault>
@@ -102,6 +114,12 @@ const Ranking = () =>
         <FormBuilder fields={form.fields} />
       </FormUnform>
 
+      {data.length > 0 && (
+        <div>
+          Você está na posição {position} de {data.length}
+        </div>
+      )}
+      
       <DataTable
         title="Ranking de alunos"
         data={data}
@@ -112,7 +130,7 @@ const Ranking = () =>
           },
           {
             prop: 'sum_grade',
-            label: 'Nota'
+            label: 'Pontos'
           },
         ]}
       />
