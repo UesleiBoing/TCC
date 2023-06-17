@@ -18,6 +18,14 @@ export default class Toast {
     return this;
   }
 
+  public warning(message: string = 'deu cagada menó', options?: ToastOptions<{}> | undefined) { 
+    if (this.id) {
+      return toast.update(this.id as Id, { ...Style.warningUpdate(message), ...options });
+    }
+
+    return toast.warning(message, { ...Style.warning, ...options });
+  }
+
   public success(message: string = 'Data sent successfully', options?: ToastOptions<{}> | undefined) { 
     if (this.id) {
       return toast.update(this.id as Id, { ...Style.successUpdate(message), ...options });

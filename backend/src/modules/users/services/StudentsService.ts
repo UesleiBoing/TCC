@@ -23,6 +23,16 @@ export default class StudentsService extends Service {
 
   client = client.student;
 
+  public async numberFormsByStudent(student_id: number) {
+    const testCount = await client.test.count({
+      where: {
+        student_id,
+      },
+    });
+
+    return { quantity: testCount };
+  }
+
   public async findById(id: number) {
     const student = await this.client.findFirst({ where: { id } });
 

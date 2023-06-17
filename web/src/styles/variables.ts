@@ -3,5 +3,6 @@ export const primaryColor = '#2196f3';
 export const errorColor = '#f20202';
 export const textColor = '#6C6C80';
 export const successColor = '#4BB543';
+export const warningColor = '#ffc107';
 
 export const buttonHover = '#ed111f';

@@ -13,6 +13,7 @@ const teachersController = new TeachersController();
 teachersRouter.get('/', ensureAuthenticationStudentsTeachers, teachersController.find);
 teachersRouter.post('/', teachersController.create);
 teachersRouter.get('/:id', ensureAuthenticationTeachers, teachersController.findOne);
+teachersRouter.get('/quantity-forms/:id', teachersController.numberFormsByTeacher);
 teachersRouter.put('/:id', ensureAuthenticationTeachers, teachersController.update);
 teachersRouter.patch('/:id', ensureAuthenticationTeachers, teachersController.update);
 teachersRouter.delete('/:id', ensureAuthenticationTeachers, teachersController.delete);

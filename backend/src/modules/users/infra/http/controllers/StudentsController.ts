@@ -9,6 +9,13 @@ import StudentRequest from '../requests/StudentRequest';
 
 export default class StudentsController extends Controller {
 
+  public async numberFormsByStudent(req: Request, res: Response): Promise<Response> {
+    const service = container.resolve(StudentsService);
+    const result = await service.numberFormsByStudent(Number(req.params.id));
+
+    return res.status(200).json(result);
+  }
+
   public async create(req: Request, res: Response): Promise<Response> {
     const service = container.resolve(StudentsService);
     const result = await service.create(req.body);

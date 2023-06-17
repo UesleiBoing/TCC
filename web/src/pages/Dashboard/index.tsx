@@ -54,10 +54,17 @@ const Dashboard = () =>
     });
   }, []);
 
+  
   const handleSituation = (topic: Topic) => {
     
   }
 
+  useEffect(() => {
+    //new Toast().success('Parabéns você, continua em 2º colocado.');
+    //new Toast().warning('Você se manteve, em 5º colocado, joque mais para subir colocações.');
+    new Toast().error('Você caiu para 7º colocado, joque mais e ultrapasse seus colegas.');
+  
+  }, [])
   return (
     <MainDefault>
       {
@@ -117,11 +124,11 @@ const Dashboard = () =>
                     prop: 'icon',
                     label: 'Situação',
                     mask: (value: any) => {
-                      let iconsvg = <AiOutlineLock color='grey'/>;
+                      let iconsvg = <AiOutlineLock />;
                       if (value.icon === SITUATION.OPEN) {
-                        iconsvg = <AiOutlineStar/>;
+                        iconsvg = <AiOutlineStar />;
                       } else if (value.icon === SITUATION.CLOSED) {
-                        iconsvg = <AiOutlineBook color='green' />;
+                        iconsvg = <AiOutlineBook />;
                       }
                       return <Situation typeicon={value.icon} to={`/tests/${value.id}`}>{iconsvg}</Situation>;
                     }

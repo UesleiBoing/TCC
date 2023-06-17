@@ -93,20 +93,12 @@ const ListKeywords: React.FC = () => {
           },
           {
             prop: 'id',
-            label: 'Mais Usado?',
+            label: 'Quantidade dúvidas',
             mask: (value: string) => {
-              const mostUsed = mostUsedKeywords
+              const mostUsed: any = mostUsedKeywords
                 .find(keyword => Number(keyword.id) === Number(value));
-
-              if (mostUsed) {
-                return (
-                  <MostUsedBlock>
-                    <MdImportantDevices />
-                  </MostUsedBlock>
-                )
-              }
-
-              return '';
+              
+              return mostUsed ? mostUsed.count : '1';
             },
           }
 

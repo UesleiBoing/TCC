@@ -7,6 +7,7 @@ import { Navigate, Route, Routes as SwitchRoutes } from 'react-router-dom';
 
 import AppPage from 'components/AppPage';
 
+import Awards from 'pages/Awards';
 import CreateClasses from 'pages/Classes/CreateClasses';
 import ListClasses from 'pages/Classes/ListClasses';
 import GenerateForms from 'pages/Forms/GenerateForms';
@@ -55,6 +56,7 @@ const Routes: React.FC = () => (
     <Route path="/sign-in" element={<SignIn />} />
     <Route path="/sign-up" element={<SignUp />} />
     <Route path="/profile" element={protect(<Profile />)} />
+    <Route path="/awards" element={protect(<Awards />)} />
     <Route path="/dashboard" element={protect(<Dashboard />)} />
     <Route path="/ranking" element={protect(<Ranking />)} />
     <Route path="/teachers" element={protect(<ListTeachers />)} />

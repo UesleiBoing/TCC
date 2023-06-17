@@ -9,6 +9,13 @@ import TeacherRequest from '../requests/TeacherRequest';
 
 export default class TeachersController extends Controller {
 
+  public async numberFormsByTeacher(req: Request, res: Response): Promise<Response> {
+    const service = container.resolve(TeachersService);
+    const result = await service.numberFormsByTeacher(Number(req.params.id));
+
+    return res.status(200).json(result);
+  }
+
   public async create(req: Request, res: Response): Promise<Response> {
     const service = container.resolve(TeachersService);
     const result = await service.create(req.body);

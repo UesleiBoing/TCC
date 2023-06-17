@@ -23,6 +23,31 @@ export default class TeachersService extends Service {
 
   client = client.teacher;
 
+  public async numberFormsByTeacher(teacher_id: number) {
+    const forms = await client.form.findMany({
+      select: {
+        topic: {
+          select: {
+            classes: {
+              select: {
+                teacher_id: true,
+              },
+            },
+          },
+        },
+      },
+      where: {
+        topic: {
+          classes: {
+            teacher_id,
+          },
+        },
+      },
+    });
+
+    return { quantity: forms.length };
+  }
+
   public async findById(id: number) {
     const teacher = await this.client.findFirst({ where: { id } });
 

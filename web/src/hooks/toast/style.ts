@@ -1,6 +1,6 @@
 import { ToastOptions, UpdateOptions } from "react-toastify";
 
-import { errorColor, successColor } from "styles/variables";
+import { errorColor, successColor, warningColor } from "styles/variables";
 
 const defaultPatterns: ToastOptions = {
     position: "top-right",
@@ -20,6 +20,14 @@ export default class Style {
         theme: "colored",       
         style: {
             backgroundColor: successColor,
+        }                
+    };
+
+    public static warning: ToastOptions = {
+        ...defaultPatterns,
+        theme: "colored",       
+        style: {
+            backgroundColor: warningColor,
         }                
     };
 
@@ -44,6 +52,24 @@ export default class Style {
             theme: "colored",       
             style: {
                 backgroundColor: successColor,
+            },
+            ...optionsParam       
+        });         
+    };
+
+    public static warningUpdate(
+        message:string, 
+        optionsParam: object = {}
+    ): UpdateOptions<unknown> {
+        return ({
+            ...defaultPatterns,
+            autoClose: 1000,
+            render: message,
+            type: "warning",
+            isLoading: false,
+            theme: "colored",       
+            style: {
+                backgroundColor: warningColor,
             },
             ...optionsParam       
         });         

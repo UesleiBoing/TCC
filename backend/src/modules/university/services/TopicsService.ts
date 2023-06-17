@@ -46,7 +46,6 @@ export default class TopicsService extends Service {
         WHERE topics.id = ${topic_id}  
         GROUP BY keywords.id, keywords.description
         ORDER BY count DESC
-        LIMIT 3
       ` as KeywordCount[];
 
     const keywordsWithNoBignit = keywords.map((keyword) => ({

@@ -1,4 +1,5 @@
 import { AiFillHome, AiOutlineForm } from "react-icons/ai";
+import { BsAward } from "react-icons/bs";
 import { CgLogOut } from "react-icons/cg";
 import { FaUserGraduate, FaUserTie, FaWpforms } from "react-icons/fa";
 import { FiUser } from "react-icons/fi";
@@ -9,6 +10,7 @@ import { MdClass, MdSubject, MdTopic } from "react-icons/md";
 export const sidebarDataTeacher = [
     [
         { title: 'Home',        path: '/ranking',     icon: <AiFillHome />,     },
+        { title: 'Conquistas',  path: '/awards',        icon: <BsAward />,     },
         { title: 'Perfil',      path: '/profile',       icon: <FiUser />,     },
         { title: 'Estudantes',  path: '/students',      icon: <FaUserGraduate />, },
        // { title: 'Professores', path: '/teachers',      icon: <FaUserTie />,      },
@@ -25,6 +27,7 @@ export const sidebarDataTeacher = [
 export const sidebarDataStudent = [
     [
         { title: 'Home',             path: '/dashboard',     icon: <AiFillHome />,     },
+        { title: 'Conquistas',       path: '/awards',        icon: <BsAward />,     },
         { title: 'Perfil',           path: '/profile',       icon: <FiUser />,     },
         { title: 'Ranking',          path: '/ranking',       icon: <GiRank3 />,      },
         { title: 'Classes',          path: '/classes',       icon: <MdClass />,        },
